@@ -11,13 +11,94 @@
 }
 
 /* ===== Header ===== */
-header {
+/* header {
   display: flex;
   align-items: center;
   padding: 15px 40px;
   background-color: #f8f9fb;
   border-bottom: 1px solid #e0e0e0;
+} */
+
+/* ===== Header Styling ===== */
+header {
+  display: flex;
+  justify-content: space-between;  /* logo+title on left, login/signup on right */
+  align-items: center;
+  background-color: #f7f7f7;
+  padding: 10px 35px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  position: relative;
+  top: 0;
+  z-index: 1000;
 }
+
+/* Left side: logo and title */
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+/* Logo Image */
+.logo {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+/* App Name Text */
+.top {
+  font-size: 24px;
+  font-weight: bold;
+  color: #1e3a8a; /* navy blue */
+}
+
+/* Right side: Login and SignUp */
+.header-right {
+  display: flex;
+  gap: 30px;
+}
+
+/* Login & Signup text */
+.left {
+  font-size: 18px;
+  color: #333;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 500;
+  display: flex;
+  height: 40px;
+  width: 80px;
+  background-color: #606f9f;
+  color: #f5f5f5;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  font-size: small;
+
+}
+
+/* Hover effects for login/signup */
+.left:hover {
+  color: #fafafa;
+  font-size: 18px;
+ 
+}
+
+/* Responsive Design (mobile view) */
+@media (max-width: 768px) {
+  header {
+    flex-direction: column;
+    text-align: center;
+    padding: 10px;
+  }
+
+  .header-right {
+    margin-top: 10px;
+  }
+}
+
 
 .logo {
   width: 55px;
@@ -68,11 +149,12 @@ main {
 }
 
 .main {
-  font-size: 3rem;
+   background: linear-gradient(90deg, #4169E1, #8A2BE2, #FF1493);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
   font-weight: 700;
-  color: #2a2a2a;
-  margin-bottom: 20px;
-  color:#606f9f;
+  font-size: 50px;
+  padding: 4px;
 }
 
 .page {
@@ -106,7 +188,7 @@ main {
   position: relative;
   z-index: 1;
   padding: 60px 20px;
-  background-color: #f8f9fb;
+  /* background-color: #f8f9fb; */
   text-align: center;
   margin-top: 150px;
   border-radius: 25px;
@@ -281,3 +363,6 @@ main {
     text-align: left;
   }
 }
+
+
+

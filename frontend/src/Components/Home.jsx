@@ -1,6 +1,7 @@
 import React from 'react';
 import '../index.css';
 import { useNavigate } from 'react-router-dom';
+import HowItWorks from './HowItWork';
 
 function Home() {
 
@@ -11,11 +12,18 @@ function Home() {
   };
 
 
+
   return (
     <>
     <header>
+    <div className='header-left'>
     <img className='logo'src="src\assets\WhatsApp Image 2025-10-21 at 21.37.10_d07fcf2f.jpg" />
     <p className='top'>AllergenScanner</p>
+    </div>
+    <div className='header-right'>
+    <h1 className='left' onClick={handleGetStarted}>Login</h1>
+    <h1 className='left'onClick={handleGetStarted}>Sign Up</h1>
+    </div>
     </header>
     <div className='fullimage'>
     <main>
@@ -60,6 +68,7 @@ function Home() {
       </div>
     </section>
  </div>
+ <HowItWorks/>
     <footer className="footer">
   <div className="footer-container">
 
@@ -74,7 +83,7 @@ function Home() {
         Detect allergens instantly with AI-powered analysis.
       </p>
     </div>
-
+     
     {/* === Quick Links === */}
     <div className="footer-column">
       <h3>Quick Links</h3>

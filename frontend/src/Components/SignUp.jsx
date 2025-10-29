@@ -29,6 +29,7 @@ const [message, setMessage] = useState("");
         email: formData.email,
         password: formData.password,
     });
+        localStorage.setItem("token", res.data.token);
         setMessage(res.data.message);
         setMessageType("success");
 

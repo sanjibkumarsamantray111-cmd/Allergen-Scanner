@@ -1,0 +1,118 @@
+/* ---------- GENERAL LAYOUT ---------- */
+.howitworks-section {
+  background: linear-gradient(180deg, #eef3ff 0%, #faf4ff 100%);
+  padding: 80px 20px;
+  text-align: center;
+  font-family: "Poppins", sans-serif;
+}
+
+.howitworks-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #2d2f39;
+  margin-bottom: 10px;
+}
+
+.howitworks-subtitle {
+  color: #555;
+  font-size: 1.1rem;
+  margin-bottom: 50px;
+}
+
+/* ---------- STEPS ---------- */
+.steps-container {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 60px;
+  margin-bottom: 80px;
+}
+
+.step-box {
+  background: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(12px);
+  border-radius: 15px;
+  padding: 30px 40px;
+  width: 250px;
+  transition: all 0.3s ease-in-out;
+}
+
+.step-box:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.step-number {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px auto;
+}
+
+/* ---------- COLORS ---------- */
+.step-number.blue {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+}
+
+.step-number.purple {
+  background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+}
+
+.step-number.pink {
+  background: linear-gradient(135deg, #ec4899, #db2777);
+}
+
+.step-title {
+  font-weight: 600;
+  color: #1e1e2f;
+  margin-bottom: 10px;
+  font-size: 1.2rem;
+}
+
+.step-description {
+  font-size: 0.95rem;
+  color: #4b5563;
+  line-height: 1.6;
+}
+
+/* ---------- CTA SECTION ---------- */
+.cta-section {
+  margin-top: 60px;
+}
+
+.cta-title {
+  font-size: 2rem;
+  font-weight: 700;
+  background: linear-gradient(90deg, #3b82f6, #8b5cf6, #ec4899);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.cta-subtitle {
+  margin-top: 15px;
+  font-size: 1.1rem;
+  color: #4b5563;
+}
+
+.cta-button {
+  margin-top: 25px;
+  background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+  border: none;
+  color: white;
+  padding: 12px 35px;
+  font-size: 1rem;
+  border-radius: 30px;
+  cursor: pointer;
+  transition: 0.3s ease;
+}
+
+.cta-button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 15px rgba(139, 92, 246, 0.4);
+}

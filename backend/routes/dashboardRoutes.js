@@ -4,7 +4,7 @@ import { getUserDashboard, getDashboardStats } from "../controller/dashboardCont
 
 const router = express.Router();
 
-router.get("/user", protect, getUserDashboard);
-router.get("/stats", protect, getDashboardStats);
+router.get("/user", protect,getUserDashboard);
+router.get("/stats", protect ,getDashboardStats);
 
 export default router;
