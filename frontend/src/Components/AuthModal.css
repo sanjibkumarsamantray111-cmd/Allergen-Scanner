@@ -70,7 +70,7 @@
 
 .switch-btn {
   background: #fff;
-  color: #606f9f;
+  color: #6c9f60;
   border: none;
   padding: 10px 28px;
   border-radius: 10px;
@@ -99,7 +99,7 @@ form {
 }
 
 form h2 {
-  color: #a83737;
+  color: hsl(101, 49%, 43%);
   margin-bottom: 20px;
   font-weight: 600;
   text-align: center;
@@ -130,7 +130,7 @@ input::placeholder {
 
 .main-btn {
   width: 100%;
-  background: linear-gradient(135deg, #606f9f, #4b5d88);
+  background: linear-gradient(135deg, #609f78, #4b5d88);
   color: white;
   border: none;
   padding: 12px;
@@ -142,7 +142,7 @@ input::placeholder {
 }
 
 .main-btn:hover {
-  background: linear-gradient(135deg, #4b5d88, #606f9f);
+  background: linear-gradient(135deg, #4b886b, #606f9f);
   transform: translateY(-2px);
 }
 
@@ -150,7 +150,7 @@ input::placeholder {
 .forgot-link {
   display: inline-block;
   margin-bottom: 15px;
-  color: #5a67d8;
+  color: #5ad85a;
   text-decoration: none;
   font-size: 0.9rem;
 }
@@ -163,7 +163,7 @@ input::placeholder {
 .social-text {
   text-align: center;
   margin-bottom: 12px;
-  color: #333;
+  color: lab(77.69% -35.39 37.06);
   font-size: 0.9rem;
 }
 
@@ -209,7 +209,7 @@ input::placeholder {
   position: fixed; /* stays visible even with frosted overlays */
   top: 25px;
   left: 25px;
-  background: rgba(255, 255, 255, 0.85);
+  background: #6db532d9;
   /* color: #606f9f; */
   border: none;
   border-radius: 50%;
@@ -226,7 +226,7 @@ input::placeholder {
 }
 
 .back-btn:hover {
-  background: #bcc0cb;
+  background: hsl(91, 86%, 22%);
   color: #fff;
   transform: scale(1.1);
 }
@@ -287,6 +287,6 @@ input::placeholder {
   color: #1da1f2; /* Twitter blue */
 }
 
-.social-btns .github {
-  color: #333; /* GitHub black */
+.social-btns .apple {
+  color: #333; /* Apple black */
 }

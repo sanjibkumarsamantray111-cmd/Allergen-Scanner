@@ -21,6 +21,8 @@ const Sidebar = ({
 }) => {
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
+
+
   // Detect screen width changes
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth <= 768);
@@ -29,8 +31,8 @@ const Sidebar = ({
   }, []);
 
   const menuItems = [
-    { label: "Home", icon: <FaHome /> },
-    { label: "My Profile", icon: <FaUser /> },
+    { label: "Home", icon: <FaHome /> , path:"/dashboard"},
+    { label: "My Profile", icon: <FaUser />,path:"/dashboard/myprofile" },
     { label: "Quick Scan", icon: <FaBolt /> },
     { label: "Scan History", icon: <FaHistory /> },
     { label: "Reports", icon: <FaFileAlt /> },
@@ -75,6 +77,8 @@ const Sidebar = ({
             />
           </div>
           <h2 className="sidebar-title">AllerScan</h2>
+
+    
 
           {/* Close Button (Mobile Only) */}
           {isMobile && (

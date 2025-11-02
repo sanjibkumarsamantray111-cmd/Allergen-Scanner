@@ -1,15 +1,16 @@
+// backend/models/Scan.js
 import mongoose from "mongoose";
 
-const ScanSchema = new mongoose.Schema({
-  foodItem: { type: String, required: true },
-  allergens: { type: [String], default: [] },
-  safetyStatus: {
-    type: String,
-    enum: ["Safe", "Moderate", "Unsafe"],
-    required: true,
+const scanSchema = new mongoose.Schema(
+  {
+    user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    foodItem: String,
+    allergens: [String],
+    safetyStatus: String,
+    safetyPercent: Number,
+    imagePath: String, // optional
   },
-  safetyPercent: { type: Number, required: true },
-  dateTime: { type: Date, default: Date.now },
-});
+  { timestamps: true }
+);
 
-export default mongoose.model("Scan", ScanSchema);
+export default mongoose.model("Scan", scanSchema);

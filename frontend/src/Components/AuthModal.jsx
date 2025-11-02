@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "./AuthModal.css";
+import heroBg from "../assets/Gemini_Generated_Image_wwxt2mwwxt2mwwxt.png";
 
 const AuthModal = ({ closeModal }) => {
   const [isLogin, setIsLogin] = useState(true);

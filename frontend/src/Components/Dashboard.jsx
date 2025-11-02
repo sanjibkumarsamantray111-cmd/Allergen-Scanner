@@ -10,42 +10,60 @@ import AIAssistant from "./AIAssistant";
 import Learn from "./Learn";
 import { FaBars } from "react-icons/fa";
 import "./dashboard.css";
+import heroBg from "../assets/Gemini_Generated_Image_wwxt2mwwxt2mwwxt.png";
 
 function Dashboard() {
   const [user, setUser] = useState(null);
-  const [isOpen, setIsOpen] = useState(true); // Sidebar open by default
+  const [isOpen, setIsOpen] = useState(window.innerWidth > 768);
   const [activePage, setActivePage] = useState("Home");
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
+  // Detect screen size to adjust sidebar behavior
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  // Fetch user data
   useEffect(() => {
     const fetchDashboard = async () => {
       const token = localStorage.getItem("token");
       if (!token) {
-        alert("No token found. Please login again.");
-        window.location.href = "/signup";
+        window.location.href = "/"; // redirect to home if no token
         return;
       }
 
       try {
         const res = await axios.get("http://localhost:5000/api/dashboard/user", {
           headers: { Authorization: `Bearer ${token}` },
-        });
-        setUser(res.data.user);
+        })
+        const userData = res.data.user;
+      setUser(userData);
+
+    //   // ✅ Auto-redirect to My Profile if profile incomplete
+      if (!userData.age || !userData.allergens?.length) {
+        setActivePage("Home");
+      } else {
+        setActivePage("My Profile");
+      }
       } catch (err) {
         console.error(err);
-        alert(err.response?.data?.message || "Unauthorized");
         localStorage.removeItem("token");
-        window.location.href = "/signup";
+        window.location.href = "/";
       }
     };
 
     fetchDashboard();
   }, []);
 
+  // Logout handler — clear token and redirect to landing page
   const handleLogout = () => {
     localStorage.removeItem("token");
-  
+    window.location.href = "/";
   };
 
+  // Menu content rendering
   const renderContent = () => {
     switch (activePage) {
       case "Home":
@@ -67,35 +85,56 @@ function Dashboard() {
     }
   };
 
+  // Toggle sidebar open/close
+  const toggleSidebar = (forceValue = null) => {
+    setIsOpen(forceValue !== null ? forceValue : !isOpen);
+  };
+
   return (
-    <div className="dashboard-container">
+    <div
+      className="dashboard-container"
+      style={{
+        backgroundImage: `url(${heroBg})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
+        minHeight: "100vh",
+      }}
+    >
       {/* Sidebar */}
       <Sidebar
         isOpen={isOpen}
-        setActivePage={setActivePage}
+        setActivePage={(page) => {
+          setActivePage(page);
+          if (isMobile) toggleSidebar(false); // auto-close on mobile
+        }}
         handleLogout={handleLogout}
-        toggleSidebar={() => setIsOpen(!isOpen)}
+        toggleSidebar={toggleSidebar}
       />
 
-      {/* Overlay (appears when sidebar is open) */}
-      {isOpen && (
+      {/* Overlay for mobile */}
+      {isMobile && isOpen && (
         <div
-          className="sidebar-overlay"
-          onClick={() => setIsOpen(false)}
+          className="sidebar-overlay active"
+          onClick={() => toggleSidebar(false)}
         ></div>
       )}
 
-      {/* Hamburger Button */}
+      {/* Hamburger button */}
       <button
-        onClick={() => setIsOpen(!isOpen)}
-        className={`menu-btn ${isOpen ? "open" : "closed"}`}
+        onClick={() => toggleSidebar()}
+        className="menu-btn"
         aria-label="Toggle Sidebar"
       >
         <FaBars />
       </button>
 
-      {/* Main Content */}
-      <main className={`main-content ${isOpen ? "sidebar-open" : "sidebar-closed"}`}>
+      {/* Main content */}
+      <main
+        className={`main-content ${
+          !isMobile && isOpen ? "sidebar-shift" : ""
+        }`}
+      >
         {user ? renderContent() : <p className="loading-text">Loading...</p>}
       </main>
     </div>
@@ -103,3 +142,7 @@ function Dashboard() {
 }
 
 export default Dashboard;
+
+
+
+

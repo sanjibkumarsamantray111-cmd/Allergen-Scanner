@@ -4,17 +4,28 @@
   min-height: 100vh;
   width: 100%;
   font-family: "Poppins", sans-serif;
-  background: linear-gradient(135deg, #dff7e3, #bfe8cc, #e8fbee);
-  background-size: cover;
-  animation: gradientMove 10s ease infinite;
   overflow-x: hidden;
   position: relative;
+
+  /* 🔹 Global background image applied to all pages */
+  background-image: var(--home-bg);
+  background-color: #eaf7ef; /* fallback if image fails */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  z-index: 0;
 }
 
-@keyframes gradientMove {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+/* Add a subtle dark overlay to make text readable */
+.dashboard-container::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.45); /* adjustable overlay */
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  z-index: 0;
 }
 
 /* ========== Sidebar ========== */
@@ -25,8 +36,6 @@
   height: 100%;
   width: 16rem;
   background: linear-gradient(135deg, #d6f5e8 0%, #b2e7cc 100%);
-  /* backdrop-filter: blur(20px) saturate(180%); */
-  /* -webkit-backdrop-filter: blur(20px) saturate(180%); */
   border-right: 1px solid rgba(255, 255, 255, 0.25);
   box-shadow: 4px 0 25px rgba(0, 0, 0, 0.1);
   color: #1f3d2c;
@@ -161,10 +170,10 @@
   min-height: 100vh;
   box-sizing: border-box;
   position: relative;
-  z-index: 1;
+  z-index: 1; /* keeps content above background overlay */
+  background: transparent !important; /* ensures bg image is visible */
 }
 
-/* Blurs main content slightly when sidebar open */
 .main-content.sidebar-blur {
   filter: blur(2px);
 }
@@ -187,13 +196,11 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-/* Moves smoothly into sidebar when open */
 .menu-btn.open {
   left: 17rem;
   background: rgba(255, 255, 255, 0.9);
 }
 
-/* Hover effect */
 .menu-btn:hover {
   background: rgba(255, 255, 255, 0.9);
   transform: scale(1.05);
@@ -322,6 +329,12 @@
   }
 
   .menu-btn.open {
-    left: 14.5rem; /* Inside sidebar */
+    left: 14.5rem;
   }
 }
+
+
+/* Hide hamburger on desktop */
+
+
+ 

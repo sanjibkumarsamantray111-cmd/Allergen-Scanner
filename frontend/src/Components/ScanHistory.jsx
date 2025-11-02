@@ -1,115 +1,114 @@
+// 
 import { useEffect, useState } from "react";
-
+import "./ScanHistory.css";
 
 export default function ScanHistory() {
   const [scans, setScans] = useState([]);
   const [summary, setSummary] = useState({});
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        const [scanRes, summaryRes] = await Promise.all([
-          fetch("http://localhost:5000/api/scans"),
-          fetch("http://localhost:5000/api/summary"),
-        ]);
-        const scansData = await scanRes.json();
-        const summaryData = await summaryRes.json();
+  // Load from localStorage
+  const fetchData = () => {
+    try {
+      const stored = JSON.parse(localStorage.getItem("scanHistory")) || [];
+      setScans(stored);
 
-        setScans(scansData);
-        setSummary(summaryData);
-        setLoading(false);
-      } catch (error) {
-        console.error("Fetch error:", error);
-      }
+      const totalScans = stored.length;
+      const allergensDetected = stored.filter(s => s.allergens.length > 0).length;
+      const safeFoods = Math.round(
+        (stored.filter(s => s.safetyStatus === "Safe").length / (totalScans || 1)) * 100
+      );
+      const riskAlerts = stored.filter(s => s.safetyStatus === "Risk").length;
+
+      setSummary({ totalScans, allergensDetected, safeFoods, riskAlerts });
+    } catch (err) {
+      console.error("Error loading history:", err);
+    } finally {
+      setLoading(false);
     }
+  };
+
+  useEffect(() => {
     fetchData();
+    window.addEventListener("scan-updated", fetchData);
+    return () => window.removeEventListener("scan-updated", fetchData);
   }, []);
 
   if (loading) {
-    return <p className="p-6 text-gray-500">Loading Scan History...</p>;
+    return (
+      <div className="loader-container">
+        <div className="spinner"></div>
+        <p>Fetching your scan history...</p>
+      </div>
+    );
   }
 
   return (
-    <div className="p-6 space-y-6">
-      {/* Page Header */}
-      <h2 className="text-2xl font-semibold text-gray-800">Scan History</h2>
-      <p className="text-gray-500">View all your previous allergen scans and results</p>
+    <div className="scan-history-container">
+      <div className="header-section">
+        <div>
+          <h2>📊 Scan History</h2>
+          <p>All your previous food scan results appear here automatically.</p>
+        </div>
+      </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="p-4">
-          <CardContent>
-            <p className="text-sm text-gray-500">Total Scans</p>
-            <h3 className="text-3xl font-bold">{summary.totalScans}</h3>
-          </CardContent>
-        </Card>
-
-        <Card className="p-4">
-          <CardContent>
-            <p className="text-sm text-gray-500">Allergens Detected</p>
-            <h3 className="text-3xl font-bold text-yellow-600">
-              {summary.allergensDetected}
-            </h3>
-          </CardContent>
-        </Card>
-
-        <Card className="p-4">
-          <CardContent>
-            <p className="text-sm text-gray-500">Safe Foods</p>
-            <h3 className="text-3xl font-bold text-green-700">
-              {summary.safeFoods}%
-            </h3>
-          </CardContent>
-        </Card>
-
-        <Card className="p-4">
-          <CardContent>
-            <p className="text-sm text-gray-500">Risk Alerts</p>
-            <h3 className="text-3xl font-bold text-red-600">
-              {summary.riskAlerts}
-            </h3>
-          </CardContent>
-        </Card>
+      <div className="summary-grid">
+        <div className="summary-card">
+          <p>Total Scans</p>
+          <h3>{summary.totalScans || 0}</h3>
+        </div>
+        <div className="summary-card yellow">
+          <p>Allergens Detected</p>
+          <h3>{summary.allergensDetected || 0}</h3>
+        </div>
+        <div className="summary-card green">
+          <p>Safe Foods</p>
+          <h3>{summary.safeFoods || 0}%</h3>
+        </div>
+        <div className="summary-card red">
+          <p>Risk Alerts</p>
+          <h3>{summary.riskAlerts || 0}</h3>
+        </div>
       </div>
 
       {/* Scan History Table */}
-      <Card className="mt-6">
-        <CardContent>
-          <h3 className="text-lg font-semibold mb-4">Recent Scan History</h3>
-          <table className="w-full text-left border-collapse">
+      <div className="history-table">
+        <h3>Recent Scan History</h3>
+        {scans.length === 0 ? (
+          <p className="no-scans">No scans available yet. Try scanning a product!</p>
+        ) : (
+          <table>
             <thead>
-              <tr className="text-gray-600 border-b">
-                <th className="pb-2">Food Item</th>
-                <th className="pb-2">Allergens</th>
-                <th className="pb-2">Safety Status</th>
-                <th className="pb-2">Date & Time</th>
+              <tr>
+                <th>Food Item</th>
+                <th>Allergens</th>
+                <th>Safety Status</th>
+                <th>Safety %</th>
+                <th>Date & Time</th>
               </tr>
             </thead>
-            <tbody className="text-gray-800">
-              {scans.map((scan) => (
-                <tr key={scan._id} className="border-b">
-                  <td className="py-2">{scan.foodItem}</td>
-                  <td>
-                    {scan.allergens.length > 0
-                      ? scan.allergens.join(", ")
-                      : "None"}
-                  </td>
+            <tbody>
+              {scans.map((scan, index) => (
+                <tr key={index}>
+                  <td>{scan.foodItem}</td>
+                  <td>{scan.allergens?.length ? scan.allergens.join(", ") : "None"}</td>
                   <td>
                     <span
-                      className={`px-2 py-1 rounded-full text-white text-xs ${
+                      className={`status-badge ${
                         scan.safetyStatus === "Safe"
-                          ? "bg-green-500"
+                          ? "green"
                           : scan.safetyStatus === "Moderate"
-                          ? "bg-yellow-500"
-                          : "bg-red-500"
+                          ? "yellow"
+                          : "red"
                       }`}
                     >
-                      {scan.safetyStatus} ({scan.safetyPercent}%)
+                      {scan.safetyStatus}
                     </span>
                   </td>
+                  <td>{scan.safetyPercent}%</td>
                   <td>
-                    {new Date(scan.dateTime).toLocaleString("en-US", {
+                    {new Date(scan.dateTime).toLocaleString("en-IN", {
                       month: "short",
                       day: "2-digit",
                       year: "numeric",
@@ -121,10 +120,9 @@ export default function ScanHistory() {
               ))}
             </tbody>
           </table>
-        </CardContent>
-      </Card>
+        )}
+      </div>
     </div>
   );
 }
-
 

@@ -24,6 +24,7 @@ const protect = async (req, res, next) => {
     }
 
     req.user = user;
+    req.userId = user._id; // 🔥 this line fixes your "Error fetching profile" issue
     next(); // move to next middleware or route
   } catch (error) {
     return res.status(401).json({ message: "Invalid or expired token" });

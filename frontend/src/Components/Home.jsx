@@ -7,7 +7,7 @@ import "./Home.css";
 
 // Assets
 import logo from "../assets/Final Logo.png";
-import heroBg from "../assets/Gemini_Generated_Image_wwxt2mwwxt2mwwxt.png";
+import heroBg from "../assets/Screenshot 2025-10-31 163529.png";
 import dietaryImg from "../assets/Gemini_Generated_Image_87amg087amg087am.png";
 import scanImg from "../assets/Gemini_Generated_Image_qtoaroqtoaroqtoa (1).png";
 import resultImg from "../assets/Gemini_Generated_Image_p29w0qp29w0qp29w (1).png";
@@ -49,6 +49,7 @@ function Home() {
         <nav className="header-nav">
           <a href="#features">Features</a>
           <a href="#how-it-works">How It Works</a>
+          <a href="#contact">Contact Us</a>
         </nav>
         <div className="header-actions">
           <button className="btn-gradient" onClick={openAuthModal}>
@@ -62,7 +63,7 @@ function Home() {
   <div className="hero-overlay"></div>
   <div className="hero-content-wrapper side-by-side">
     <div className="hero-content">
-      <h1>Scan. Detect. Live Freely.</h1>
+      <h1>Scan. Detect. Live Healthy.</h1>
       <p>
       AllergyScanner is a mobile app that uses Al to scan food items, menus, or labels, instantly identifying ingredients and checking them against a user's allergy profile to determine if they're safe to eat.
       </p>

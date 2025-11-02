@@ -55,6 +55,7 @@
 }
 
 .hero-overlay {
+  background-image: url('../assets/Screenshot\ 2025-10-31\ 163529.png');
   content: '';
   position: absolute;
   top: 0;
@@ -63,7 +64,7 @@
   bottom: 0;
   background: linear-gradient(
     90deg,
-    rgba(255, 255, 255, 0.75) 0%,
+    rgba(93, 201, 180, 0.34) 0%,
     rgba(235, 240, 255, 0.65) 100%
   );
   z-index: 1;
@@ -220,10 +221,10 @@
 
 /* === WRAPPER FOR BACKGROUND PATTERN === */
 .pattern-background-section {
-  background-image: url(''); /* Check filename */
-  background-repeat: repeat;
+  /* background-image: url('../assets/Screenshot\ 2025-10-31\ 163529.png'); Check filename */
+  background-repeat: no-repeat;
   background-size: auto;
-  background-color: #fdfdff; /* Base color */
+  background-color: #04684c3d; /* Base color */
   padding: 0.1px 0; /* Prevents margin collapse */
 }
 
