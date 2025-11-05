@@ -1,4 +1,3 @@
-/* Overlay for modal effect */
 .auth-modal-overlay {
   position: fixed;
   inset: 0;
@@ -289,4 +288,28 @@ input::placeholder {
 
 .social-btns .apple {
   color: #333; /* Apple black */
+}
+.password-container {
+  position: relative;
+  width: 100%;
+}
+
+.password-container input {
+  width: 100%;
+  padding-right: 40px; /* space for the icon */
+  box-sizing: border-box;
+}
+
+.eye-icon {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: #555;
+  transition: color 0.2s ease;
+}
+
+.eye-icon:hover {
+  color: #000;
 }

@@ -1,33 +1,47 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import "./Aiassients.css";
 import { FaPaperPlane } from "react-icons/fa";
-import axios from "axios";
-import API from "../api/api.js"
+import API from "../api/api.js";
 
 function AIScreen() {
   const [messages, setMessages] = useState([
-    { sender: "bot", text: "👋 Hello! I’m your AI allergen assistant. How can I help you today?" },
+    {
+      sender: "bot",
+      text: "👋 Hello! I’m your AI allergen assistant. How can I help you today?",
+    },
   ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // 🔽 Auto scroll to bottom on new message
+  const chatEndRef = useRef(null);
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, loading]);
+
   const handleSend = async () => {
-    if (!input.trim()) return;
+    if (!input.trim() || loading) return;
 
     const userMsg = { sender: "user", text: input };
-    setMessages([...messages, userMsg]);
+    setMessages((prev) => [...prev, userMsg]);
     setInput("");
     setLoading(true);
 
     try {
-      const res = await API.post("/ask", {
-        question: input,
-      });
+      const res = await API.post("/ask", { question: input });
 
-      const botMsg = { sender: "bot", text: res.data.answer };
+      const botMsg = {
+        sender: "bot",
+        text: res.data.answer || "⚠ No response received.",
+      };
+
       setMessages((prev) => [...prev, botMsg]);
     } catch (error) {
-      const botMsg = { sender: "bot", text: "⚠ Sorry, I couldn’t get a response right now." };
+      console.error("AI Error:", error);
+      const botMsg = {
+        sender: "bot",
+        text: "⚠ Sorry, I couldn’t get a response right now.",
+      };
       setMessages((prev) => [...prev, botMsg]);
     } finally {
       setLoading(false);
@@ -38,7 +52,9 @@ function AIScreen() {
     <div className="ai-layout">
       <div className="chat-section">
         <h2>AI Assistant</h2>
-        <p className="subtitle">Get instant answers about allergens, foods, and safety</p>
+        <p className="subtitle">
+          Get instant answers about allergens, foods, and safety.
+        </p>
 
         <div className="chat-box">
           {messages.map((m, i) => (
@@ -46,7 +62,14 @@ function AIScreen() {
               <p>{m.text}</p>
             </div>
           ))}
-          {loading && <div className="chat-message bot"><p>🤖 Thinking...</p></div>}
+
+          {loading && (
+            <div className="chat-message bot">
+              <p>🤖 Thinking...</p>
+            </div>
+          )}
+
+          <div ref={chatEndRef} />
         </div>
 
         <div className="chat-input">
@@ -56,8 +79,9 @@ function AIScreen() {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleSend()}
+            disabled={loading}
           />
-          <button onClick={handleSend}>
+          <button onClick={handleSend} disabled={loading}>
             <FaPaperPlane size={16} />
           </button>
         </div>

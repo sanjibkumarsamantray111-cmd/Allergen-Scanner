@@ -1,431 +1,28 @@
-// import React, { useState } from "react";
-// import { Upload, CheckCircle2, RefreshCw } from "lucide-react";
-// import "./QuickScan.css";
-
-// const QuickScan = () => {
-//   const [uploadedImage, setUploadedImage] = useState(null);
-//   const [scanned, setScanned] = useState(false);
-//   const [loading, setLoading] = useState(false); // 🧩 Added
-//   const [scanResult, setScanResult] = useState(""); // 🧩 Added
-
-//   const handleFileChange = (e) => {
-//     const file = e.target.files[0];
-//     if (file) {
-//       setUploadedImage(URL.createObjectURL(file));
-//       setScanned(false);
-//       setScanResult("");
-//     }
-//   };
-
-//   const handleReupload = () => {
-//     setUploadedImage(null);
-//     setScanned(false);
-//     setScanResult("");
-//   };
-
-//   // 🧩 Updated handleScan to call Gemini API
-//   const handleScan = async () => {
-//     if (!uploadedImage) return;
-//     setLoading(true);
-//     setScanResult("Analyzing image...");
-
-//     try {
-//       const apiKey = process.env.REACT_APP_GEMINI_API_KEY; // Make sure it's in your .env file
-//       const response = await fetch(
-//         `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
-//         {
-//           method: "POST",
-//           headers: {
-//             "Content-Type": "application/json",
-//           },
-//           body: JSON.stringify({
-//             contents: [
-//               {
-//                 parts: [
-//                   {
-//                     text:
-//                       "You are an allergen detection AI. The user uploaded a food label image. Analyze it and respond briefly whether it may contain common allergens (gluten, dairy, nuts, soy, eggs, shellfish).",
-//                   },
-//                 ],
-//               },
-//             ],
-//           }),
-//         }
-//       );
-
-//       const data = await response.json();
-//       console.log("Gemini API Response:", data);
-
-//       const aiText =
-//         data?.candidates?.[0]?.content?.parts?.[0]?.text ||
-//         "No clear analysis found.";
-
-//       setScanResult(aiText);
-//     } catch (err) {
-//       console.error("Error scanning:", err);
-//       setScanResult("Error analyzing image. Please try again.");
-//     }
-
-//     setLoading(false);
-//     setScanned(true);
-//   };
-
-//   return (
-//     <div className="quickscan-container">
-//       <div className="quickscan-header">
-//         <h1>Quick Scan</h1>
-//         <p>Upload a food label or barcode image to detect allergens</p>
-//       </div>
-
-//       <div className="quickscan-card">
-//         {/* Stage 1 - Upload */}
-//         {!uploadedImage && (
-//           <div className="upload-section">
-//             <h2>Upload Image</h2>
-//             <p>Upload an image of a food label or barcode</p>
-
-//             <div className="upload-box">
-//               <Upload className="upload-icon" />
-//               <p>Drop your file here or click to browse</p>
-
-//               <label htmlFor="file-upload" className="upload-btn">
-//                 Upload Image
-//               </label>
-//               <input
-//                 id="file-upload"
-//                 type="file"
-//                 accept="image/*"
-//                 className="hidden-input"
-//                 onChange={handleFileChange}
-//               />
-//             </div>
-
-//             <p className="upload-info">
-//               Supported formats: JPG, PNG • Max size: 10MB
-//             </p>
-//           </div>
-//         )}
-
-//         {/* Stage 2 - Ready to Scan */}
-//         {uploadedImage && !scanned && (
-//           <div className="ready-section">
-//             <h2>Ready to Scan</h2>
-//             <p>Click below to analyze the uploaded image</p>
-
-//             <div className="image-preview">
-//               <img src={uploadedImage} alt="Preview" />
-//             </div>
-
-//             <button
-//               className="scan-btn"
-//               onClick={handleScan}
-//               disabled={loading}
-//             >
-//               {loading ? "Analyzing..." : "🔍 Scan Now"}
-//             </button>
-
-//             <button onClick={handleReupload} className="reupload-btn">
-//               <RefreshCw className="reupload-icon" /> Re-upload
-//             </button>
-//           </div>
-//         )}
-
-//         {/* Stage 3 - Scan Results */}
-//         {uploadedImage && scanned && (
-//           <div className="result-section">
-//             <div className="scan-left">
-//               <CheckCircle2 className="check-icon" />
-//               <h2>Scan Complete</h2>
-//               <div className="image-preview small">
-//                 <img src={uploadedImage} alt="Scanned" />
-//               </div>
-
-//               <button onClick={handleReupload} className="reupload-btn">
-//                 <RefreshCw className="reupload-icon" /> Upload Another
-//               </button>
-//             </div>
-
-//             <div className="scan-right">
-//               <h3>AI Allergen Analysis</h3>
-//               <p>{scanResult}</p>
-
-//               <div className="score-bars">
-//                 {[ // static example, can later replace with AI result mapping
-//                   { label: "Gluten-Free", value: 99 },
-//                   { label: "Dairy-Free", value: 85 },
-//                   { label: "Nut-Free", value: 87 },
-//                 ].map((item, i) => (
-//                   <div key={i} className="score-row">
-//                     <span>{item.label}</span>
-//                     <div className="progress-bar">
-//                       <div
-//                         className="progress-fill"
-//                         style={{ width: `${item.value}%` }}
-//                       ></div>
-//                     </div>
-//                     <span className="percent">{item.value}%</span>
-//                   </div>
-//                 ))}
-//               </div>
-//             </div>
-//           </div>
-//         )}
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default QuickScan;
-
-
-// import React, { useState, useEffect } from "react";
-// import { Upload, CheckCircle2, RefreshCw } from "lucide-react";
-// import "./QuickScan.css";
-
-// const QuickScan = () => {
-//   const [uploadedImage, setUploadedImage] = useState(null);
-//   const [scanned, setScanned] = useState(false);
-//   const [loading, setLoading] = useState(false);
-//   const [scanResult, setScanResult] = useState("");
-//   const [safetyScore, setSafetyScore] = useState(null);
-//   const [matchedAllergens, setMatchedAllergens] = useState([]);
-//    const [userAllergens, setUserAllergens] = useState([]);
-
-//   // Example allergens (you’ll replace this with user profile data later)
-//   // const userAllergens = ["gluten", "peanut", "milk", "soy", "egg", "fish", "shellfish"];
-
-//   // const handleFileChange = (e) => {
-//   //   const file = e.target.files[0];
-//   //   if (file) {
-//   //     setUploadedImage(file);
-//   //     setScanned(false);
-//   //     setScanResult("");
-//   //     setSafetyScore(null);
-//   //     setMatchedAllergens([]);
-//   //   }
-//   // };
-
-//    useEffect(() => {
-//     const fetchUserAllergens = async () => {
-//       try {
-//         const res = await fetch("http://localhost:5000/api/profile/me", {
-//           headers: {
-//             Authorization: `Bearer ${localStorage.getItem("token")}`,
-//           },
-//         });
-//         const data = await res.json();
-//         setUserAllergens(data.allergens || []);
-//       } catch (err) {
-//         console.error("❌ Failed to fetch user allergens:", err);
-//       }
-//     };
-
-//     fetchUserAllergens();
-//   }, []);
-
-//   const handleFileChange = (e) => {
-//     const file = e.target.files[0];
-//     if (file) {
-//       setUploadedImage(file);
-//       setScanned(false);
-//       setScanResult("");
-//       setSafetyScore(null);
-//       setMatchedAllergens([]);
-//     }
-//   };
-
-//   const handleReupload = () => {
-//     setUploadedImage(null);
-//     setScanned(false);
-//     setScanResult("");
-//     setSafetyScore(null);
-//     setMatchedAllergens([]);
-//   };
-
-//   const getBase64 = (file) =>
-//     new Promise((resolve, reject) => {
-//       const reader = new FileReader();
-//       reader.readAsDataURL(file);
-//       reader.onload = () => resolve(reader.result.split(",")[1]);
-//       reader.onerror = reject;
-//     });
-
-//   const handleScan = async () => {
-//   if (!uploadedImage) return;
-//   setLoading(true);
-//   setScanResult("Analyzing image...");
-
-//   try {
-//     const formData = new FormData();
-//     formData.append("image", uploadedImage);
-
-//     // 👇 Call your backend endpoint instead of Gemini directly
-//     const response = await fetch("http://localhost:5000/api/scan", {
-//       method: "POST",
-//       headers: {
-//         Authorization: `Bearer ${localStorage.getItem("token")}`, // if auth
-//       },
-//       body: formData,
-//     });
-
-//     const data = await response.json();
-//     console.log("✅ Backend scan result:", data);
-
-//     if (!response.ok) throw new Error(data.message || "Scan failed");
-
-//     // setSafetyScore(data.safetyPercent);
-//     // setScanResult(
-//     //   `🧠 ${data.foodItem || "Food item"} detected.\nStatus: ${data.safetyStatus}`
-//     // );
-//     setSafetyScore(data.safetyPercent || 0);
-//     setMatchedAllergens(data.detectedAllergens || []);
-//     // After setMatchedAllergens(data.detectedAllergens || []);
-// // Add this code 👇
-
-// // Save scan data locally for history
-// const newScan = {
-//   foodItem: data.foodItem || "Unknown Food",
-//   allergens: data.detectedAllergens || [],
-//   safetyStatus: data.safetyStatus || "Unknown",
-//   safetyPercent: data.safetyPercent || 0,
-//   dateTime: new Date().toISOString(),
-// };
-
-// const existingScans = JSON.parse(localStorage.getItem("scanHistory")) || [];
-// localStorage.setItem("scanHistory", JSON.stringify([newScan, ...existingScans]));
-
-// // Trigger update event for ScanHistory
-// window.dispatchEvent(new Event("scan-updated"));
-
-//   } catch (err) {
-//     console.error("❌ Error analyzing image:", err);
-//     setScanResult("❌ Error analyzing the food image. Try again.");
-//   }
-
-//   setLoading(false);
-//   setScanned(true);
-// };
-
-
-//   return (
-//     <div className="quickscan-container">
-//       <div className="quickscan-header">
-//         <h1>Quick Scan</h1>
-//         <p>Upload a food photo to check for possible allergens</p>
-//       </div>
-
-//       <div className="quickscan-card">
-//         {!uploadedImage && (
-//           <div className="upload-section">
-//             <h2>Upload Food Image</h2>
-//             <p>Take or upload a picture of your meal</p>
-//             <div className="upload-box">
-//               <Upload className="upload-icon" />
-//               <p>Drop your file here or click to browse</p>
-//               <label htmlFor="file-upload" className="upload-btn">
-//                 Upload Image
-//               </label>
-//               <input
-//                 id="file-upload"
-//                 type="file"
-//                 accept="image/*"
-//                 className="hidden-input"
-//                 onChange={handleFileChange}
-//               />
-//             </div>
-//           </div>
-//         )}
-
-//         {uploadedImage && !scanned && (
-//           <div className="ready-section">
-//             <h2>Ready to Analyze</h2>
-//             <div className="image-preview">
-//               <img src={URL.createObjectURL(uploadedImage)} alt="Preview" />
-//             </div>
-//             <button className="scan-btn" onClick={handleScan} disabled={loading}>
-//               {loading ? "Analyzing..." : "🔍 Analyze Food"}
-//             </button>
-//             <button onClick={handleReupload} className="reupload-btn">
-//               <RefreshCw className="reupload-icon" /> Re-upload
-//             </button>
-//           </div>
-//         )}
-
-//         {uploadedImage && scanned && (
-//           <div className="result-section">
-//             <div className="scan-left">
-//               <CheckCircle2 className="check-icon" />
-//               <h2>Scan Complete</h2>
-//               <div className="image-preview small">
-//                 <img src={URL.createObjectURL(uploadedImage)} alt="Scanned" />
-//               </div>
-//               <button onClick={handleReupload} className="reupload-btn">
-//                 <RefreshCw className="reupload-icon" /> Upload Another
-//               </button>
-//             </div>
-
-//             <div className="scan-right">
-//               <h3>AI Analysis Result</h3>
-//               <p>{scanResult}</p>
-
-//               {safetyScore !== null && (
-//                 <>
-//                   <div className="score-circle">
-//                     <span>{safetyScore}%</span>
-//                   </div>
-//                   <p>
-//                     {safetyScore > 90
-//                       ? "🟢 Safe to eat"
-//                       : safetyScore > 70
-//                       ? "🟠 Might contain traces"
-//                       : "🔴 High allergen risk"}
-//                   </p>
-//                 </>
-//               )}
-
-//               {matchedAllergens.length > 0 && (
-//                 <div className="allergen-list">
-//                   <h4>Your Allergens Possibly Present:</h4>
-//                   <ul>
-//                     {matchedAllergens.map((a, i) => (
-//                       <li key={i}>{a}</li>
-//                     ))}
-//                   </ul>
-//                 </div>
-//               )}
-//             </div>
-//           </div>
-//         )}
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default QuickScan;
 import React, { useState, useEffect } from "react";
-import { Upload, CheckCircle2, RefreshCw } from "lucide-react";
 import "./QuickScan.css";
-import API from "../api/api";
+import API from "../api/api.js";
+import toast from "react-hot-toast";
 
 const QuickScan = () => {
   const [uploadedImage, setUploadedImage] = useState(null);
   const [scanned, setScanned] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [scanResult, setScanResult] = useState("");
-  const [safetyScore, setSafetyScore] = useState(null);
-  const [matchedAllergens, setMatchedAllergens] = useState([]);
+  const [scanResultText, setScanResultText] = useState("");
+  const [safetyPercent, setSafetyPercent] = useState(null);
+  const [detectedAllergens, setDetectedAllergens] = useState([]);
+  const [ingredients, setIngredients] = useState([]);
+  const [alternatives, setAlternatives] = useState({});
   const [userAllergens, setUserAllergens] = useState([]);
 
   useEffect(() => {
     const fetchUserAllergens = async () => {
       try {
-        const res = await fetch(`${API}/profile/me`, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
+        const token = localStorage.getItem("token");
+        const res = await API.get("/profile/me", {
+          headers: { Authorization: `Bearer ${token}` },
         });
-        const data = await res.json();
-        setUserAllergens(data.allergens || []);
+        const allergens = res.data.foods?.map((f) => f.allergen) || [];
+        setUserAllergens(allergens);
       } catch (err) {
         console.error("❌ Failed to fetch user allergens:", err);
       }
@@ -438,173 +35,201 @@ const QuickScan = () => {
     if (file) {
       setUploadedImage(file);
       setScanned(false);
-      setScanResult("");
-      setSafetyScore(null);
-      setMatchedAllergens([]);
+      setScanResultText("");
+      setSafetyPercent(null);
+      setDetectedAllergens([]);
+      setIngredients([]);
+      setAlternatives({});
     }
   };
 
   const handleReupload = () => {
     setUploadedImage(null);
     setScanned(false);
-    setScanResult("");
-    setSafetyScore(null);
-    setMatchedAllergens([]);
+    setScanResultText("");
+    setSafetyPercent(null);
+    setDetectedAllergens([]);
+    setIngredients([]);
+    setAlternatives({});
   };
 
   const handleScan = async () => {
     if (!uploadedImage) return;
     setLoading(true);
-    setScanResult("Analyzing image...");
+    setScanResultText("Analyzing image...");
 
     try {
+      const token = localStorage.getItem("token");
       const formData = new FormData();
       formData.append("image", uploadedImage);
 
-      const response = await fetch(`http://localhost:5000/api/scan`, {
+      const resp = await fetch("http://localhost:5000/api/scan", {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
         body: formData,
       });
 
-      const data = await response.json();
-      console.log("✅ Backend scan result:", data);
-      if (!response.ok) throw new Error(data.message || "Scan failed");
+      const data = await resp.json();
+      if (!resp.ok) throw new Error(data.message || "Scan failed");
 
-      setSafetyScore(data.safetyPercent || 0);
-      setMatchedAllergens(data.detectedAllergens || []);
+      const scannedIngredients = data.ingredients || [];
+      setIngredients(scannedIngredients);
 
-      // ✅ Save scan data locally for history (IMPORTANT PART)
-      const newScan = {
-        foodItem: data.foodItem || "Unknown Food",
-        allergens: data.detectedAllergens?.length
-          ? data.detectedAllergens
-          : ["None"],
-        safetyStatus: data.safetyStatus || "Unknown",
-        safetyPercentage: data.safetyPercent || 0,
-        date: new Date().toLocaleString(),
-      };
-
-      // ✅ Store in localStorage
-      const existingScans =
-        JSON.parse(localStorage.getItem("scanHistory")) || [];
-      localStorage.setItem(
-        "scanHistory",
-        JSON.stringify([newScan, ...existingScans])
+      const normalizedIngredients = scannedIngredients.map((i) =>
+        i.toLowerCase().trim()
       );
+      const normalizedUserAllergens = userAllergens.map((a) =>
+        a.toLowerCase().trim()
+      );
+      const matched = normalizedUserAllergens.filter((allergen) =>
+        normalizedIngredients.some((ing) => ing.includes(allergen))
+      );
+      setDetectedAllergens(matched);
 
-      // ✅ Notify Home1.jsx to update stats and recent scans
-      window.dispatchEvent(new Event("scan-updated"));
+      const safety = matched.length === 0 ? 100 : 50;
+      setSafetyPercent(safety);
 
-      setScanResult("✅ Analysis complete!");
+      const allergenAlternatives = {
+        dairy: ["soy milk", "almond cheese"],
+        soy: ["pea protein", "coconut aminos"],
+        peanuts: ["almond butter", "sunflower seeds"],
+        "tree nuts": ["seeds", "legume butter"],
+        shellfish: ["chicken", "tofu"],
+        sugar: ["stevia", "monk fruit"],
+        maggies: ["other instant noodles"],
+      };
+      const matchedAlternatives = {};
+      matched.forEach((a) => {
+        if (allergenAlternatives[a.toLowerCase()]) {
+          matchedAlternatives[a] = allergenAlternatives[a.toLowerCase()];
+        }
+      });
+      setAlternatives(matchedAlternatives);
+
+      setScanResultText("Analysis complete ✅");
     } catch (err) {
-      console.error("❌ Error analyzing image:", err);
-      setScanResult("❌ Error analyzing the food image. Try again.");
+      console.error("❌ Scan failed:", err);
+      setScanResultText("Error analyzing image.");
+      toast.error("Failed to analyze image");
+    } finally {
+      setLoading(false);
+      setScanned(true);
     }
-
-    setLoading(false);
-    setScanned(true);
   };
 
   return (
     <div className="quickscan-container">
-      <div className="quickscan-header">
-        <h1>Quick Scan</h1>
-        <p>Upload a food photo to check for possible allergens</p>
-      </div>
+      <h1>Quick Scan</h1>
 
-      <div className="quickscan-card">
-        {!uploadedImage && (
-          <div className="upload-section">
-            <h2>Upload Food Image</h2>
-            <p>Take or upload a picture of your meal</p>
-            <div className="upload-box">
-              <Upload className="upload-icon" />
-              <p>Drop your file here or click to browse</p>
-              <label htmlFor="file-upload" className="upload-btn">
-                Upload Image
-              </label>
-              <input
-                id="file-upload"
-                type="file"
-                accept="image/*"
-                className="hidden-input"
-                onChange={handleFileChange}
-              />
-            </div>
-          </div>
-        )}
+      {!uploadedImage && (
+        <div className="upload-section card">
+          <label className="upload-btn">
+            Choose Image
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              style={{ display: "none" }}
+            />
+          </label>
+        </div>
+      )}
 
-        {uploadedImage && !scanned && (
-          <div className="ready-section">
-            <h2>Ready to Analyze</h2>
-            <div className="image-preview">
-              <img src={URL.createObjectURL(uploadedImage)} alt="Preview" />
-            </div>
-            <button
-              className="scan-btn"
-              onClick={handleScan}
-              disabled={loading}
-            >
-              {loading ? "Analyzing..." : "🔍 Analyze Food"}
+      {uploadedImage && !scanned && (
+        <div className="upload-section card">
+          <img
+            src={URL.createObjectURL(uploadedImage)}
+            alt="preview"
+            className="preview-img"
+          />
+          <div className="btn-group">
+            <button onClick={handleScan} disabled={loading}>
+              {loading ? "Analyzing..." : "Analyze"}
             </button>
-            <button onClick={handleReupload} className="reupload-btn">
-              <RefreshCw className="reupload-icon" /> Re-upload
-            </button>
+            <button onClick={handleReupload}>Cancel</button>
           </div>
-        )}
+        </div>
+      )}
 
-        {uploadedImage && scanned && (
-          <div className="result-section">
-            <div className="scan-left">
-              <CheckCircle2 className="check-icon" />
-              <h2>Scan Complete</h2>
-              <div className="image-preview small">
-                <img src={URL.createObjectURL(uploadedImage)} alt="Scanned" />
-              </div>
-              <button onClick={handleReupload} className="reupload-btn">
-                <RefreshCw className="reupload-icon" /> Upload Another
-              </button>
-            </div>
+      {scanned && (
+        <div className="result-section card">
+          <h3>{scanResultText}</h3>
+          <img
+            src={URL.createObjectURL(uploadedImage)}
+            alt="scanned"
+            className="preview-img"
+          />
 
-            <div className="scan-right">
-              <h3>AI Analysis Result</h3>
-              <p>{scanResult}</p>
-
-              {safetyScore !== null && (
-                <>
-                  <div className="score-circle">
-                    <span>{safetyScore}%</span>
-                  </div>
-                  <p>
-                    {safetyScore > 90
-                      ? "🟢 Safe to eat"
-                      : safetyScore > 70
-                      ? "🟠 Might contain traces"
-                      : "🔴 High allergen risk"}
-                  </p>
-                </>
+          <div className="cards-grid">
+            <div className="result-card">
+              <h4>Ingredients Detected</h4>
+              {ingredients.length ? (
+                <ul>
+                  {ingredients.map((i, idx) => (
+                    <li key={idx}>{i}</li>
+                  ))}
+                </ul>
+              ) : (
+                <p>No ingredients detected</p>
               )}
+            </div>
 
-              {matchedAllergens.length > 0 && (
-                <div className="allergen-list">
-                  <h4>Your Allergens Possibly Present:</h4>
-                  <ul>
-                    {matchedAllergens.map((a, i) => (
-                      <li key={i}>{a}</li>
-                    ))}
-                  </ul>
+            <div className="result-card">
+              <h4>Matched Allergens</h4>
+              {detectedAllergens.length ? (
+                <ul>
+                  {detectedAllergens.map((a, idx) => (
+                    <li key={idx}>{a}</li>
+                  ))}
+                </ul>
+              ) : (
+                <p>No matched allergens</p>
+              )}
+            </div>
+
+            <div className="result-card safety-card">
+              <h4>Safety</h4>
+              {safetyPercent !== null ? (
+                <div
+                  className={`safety-circle ${
+                    safetyPercent > 90
+                      ? "safe"
+                      : safetyPercent > 70
+                      ? "moderate"
+                      : "unsafe"
+                  }`}
+                >
+                  {safetyPercent}%
                 </div>
+              ) : (
+                <p>Not available</p>
               )}
             </div>
+
+            {Object.keys(alternatives).length > 0 && (
+              <div className="result-card">
+                <h4>Alternatives</h4>
+                {Object.entries(alternatives).map(([alg, list]) => (
+                  <div key={alg} className="alt-item">
+                    <strong>{alg}</strong>
+                    <ul>
+                      {list.map((alt, i) => (
+                        <li key={i}>{alt}</li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
-        )}
-      </div>
+
+          <div className="scan-again">
+            <button onClick={handleReupload}>Scan another</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
 
 export default QuickScan;
-

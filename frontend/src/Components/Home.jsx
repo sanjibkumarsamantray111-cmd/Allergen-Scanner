@@ -147,10 +147,11 @@ function Home() {
           <div className="footer-column">
             <h3>Connect</h3>
             <div className="footer-icons">
-              <a href="#"><i className="fab fa-github"></i></a>
-              <a href="#"><i className="fab fa-twitter"></i></a>
-              <a href="mailto:support@allergenscanner.com"><i className="fas fa-envelope"></i></a>
-            </div>
+  <a href="tel:+911234567890"><i className="fas fa-phone"></i></a>
+  <a href="https://www.google.com" target="_blank" rel="noopener noreferrer"><i className="fab fa-google"></i></a>
+  <a href="https://twitter.com" target="_blank" rel="noopener noreferrer"><i className="fab fa-twitter"></i></a>
+</div>
+
           </div>
         </div>
         <div className="footer-bottom">

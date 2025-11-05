@@ -136,6 +136,8 @@ select {
 .add-food-btn {
   background: #3b82f6;
   color: white;
+  display: flex;
+  justify-content: flex-start;
 }
 
 .edit-btn:hover {
@@ -250,10 +252,12 @@ select {
   padding: 10px;
   margin-bottom: 12px;
   border-radius: 10px;
-  border: 1px solid #aee6d1;
+  border: 1px solid #6bb197;
   background: #f6fffb;
   font-size: 0.9rem;
+  color: #064e3b; /* ✅ readable dark greenish text color */
 }
+
 
 .modal-buttons {
   display: flex;
@@ -317,8 +321,9 @@ select {
 .allergen-container {
   display: flex;
   flex-wrap: wrap;
-  justify-content: center;
-  gap: 10px;
+  justify-content: flex-start; /* ✅ ensures tags start from left */
+  /* align-items: flex-start;     ✅ keeps vertical alignment clean */
+  gap: 10px 15px;              /* ✅ fixed comma mistake in gap */
   margin-top: 10px;
 }
 

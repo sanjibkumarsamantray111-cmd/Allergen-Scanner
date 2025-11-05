@@ -40,8 +40,7 @@ app.use("/api/profile", profileRoutes);
 // --- GEMINI AI SETUP ---
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
-const systemInstruction =
-  "You are an AI allergen assistant that helps users identify food allergens and provide safety advice clearly and accurately.";
+let chatHistory = [];
 
 // --- AI CHAT ENDPOINT ---
 app.post("/api/ask", async (req, res) => {
@@ -55,31 +54,42 @@ app.post("/api/ask", async (req, res) => {
     const model = genAI.getGenerativeModel({
       model: "gemini-pro-latest",
       systemInstruction:
-        "You are an AI allergen assistant. Always give short, accurate, and clear answers about food allergens, ingredients, and safety. " +
-        "Limit your responses to 2–3 concise sentences only.",
+        "You are an AI allergen assistant that helps users identify food allergens and provide safety advice clearly and accurately.",
     });
 
-    const chat = model.startChat({ history: [] });
+    // 🧠 Include previous temporary messages in the context
+    const chat = model.startChat({
+      history: chatHistory.map((m) => ({
+        role: m.sender,
+        parts: [{ text: m.text }],
+      })),
+    });
+
+    // 🗣 Add user question to temporary memory
+    chatHistory.push({ sender: "user", text: question });
+
     const result = await chat.sendMessage(
-      `Answer briefly and accurately in 2–3 sentences: ${question}`
+      `Answer briefly (2–3 sentences) about food allergens: ${question}`
     );
 
-    // --- ✨ Limit to 3 sentences maximum ---
     const answer = result.response.text().trim();
-    const limitedAnswer =
-      answer.split(". ").slice(0, 3).join(". ") +
-      (answer.endsWith(".") ? "" : ".");
 
-    // --- Send final short reply ---
-    res.json({ answer: limitedAnswer });
+    // 💬 Store AI response temporarily
+    chatHistory.push({ sender: "model", text: answer });
+
+    // 🧹 Limit memory to last 20 messages
+    if (chatHistory.length > 20) chatHistory = chatHistory.slice(-20);
+
+    res.json({ answer });
   } catch (error) {
     console.error("❌ Gemini error:", error);
     res.status(500).json({ answer: "⚠ Error: Unable to fetch AI response." });
   }
 });
 
-
-
+app.get("/api/chat-history", (req, res) => {
+  res.json(chatHistory);
+});
 
 // --- MULTER SETUP ---
 const storage = multer.diskStorage({

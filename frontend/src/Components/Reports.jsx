@@ -1,5 +1,4 @@
-// import React from "react";
-// import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   LineChart,
   Line,
@@ -17,113 +16,113 @@ import {
 import "./Reports.css";
 
 const Reports = () => {
+  const [scanHistory, setScanHistory] = useState([]);
   const [summary, setSummary] = useState({
     totalScans: 0,
     allergensDetected: 0,
     safeFoods: 0,
     riskAlerts: 0,
-    lastMonthChange: { totalScans: 0, allergensDetected: 0, safeFoods: 0, riskAlerts: 0 },
   });
-
   const [weeklyData, setWeeklyData] = useState([]);
   const [allergenData, setAllergenData] = useState([]);
   const [foodData, setFoodData] = useState([]);
 
-  const COLORS = ["#A8E6CF", "#56CC9D", "#FFD166", "#FFB347", "#FF9AA2", "#9D84FF", "#84C1FF"];
+  const COLORS = ["#A8E6CF", "#56CC9D", "#FFD166", "#FFB347", "#FF9AA2"];
 
-  const calculateStats = () => {
-    const stored = JSON.parse(localStorage.getItem("scanHistory")) || [];
-    if (stored.length === 0) return;
-
-    const now = new Date();
-    const currentMonth = now.getMonth();
-    const lastMonth = (currentMonth - 1 + 12) % 12;
-
-    const currentMonthScans = stored.filter(
-      s => new Date(s.dateTime).getMonth() === currentMonth
-    );
-    const lastMonthScans = stored.filter(
-      s => new Date(s.dateTime).getMonth() === lastMonth
-    );
-
-    const totalScans = currentMonthScans.length;
-    const prevTotal = lastMonthScans.length || 1;
-
-    const allergensDetected = currentMonthScans.filter(s => s.allergens.length > 0).length;
-    const prevAllergens = lastMonthScans.filter(s => s.allergens.length > 0).length || 1;
-
-    const safeFoods =
-      Math.round(
-        (currentMonthScans.filter(s => s.safetyStatus === "Safe").length /
-          (totalScans || 1)) *
-          100
-      ) || 0;
-
-    const prevSafeFoods =
-      Math.round(
-        (lastMonthScans.filter(s => s.safetyStatus === "Safe").length /
-          (lastMonthScans.length || 1)) *
-          100
-      ) || 0;
-
-    const riskAlerts = currentMonthScans.filter(s => s.safetyStatus === "Risk").length;
-    const prevRisks = lastMonthScans.filter(s => s.safetyStatus === "Risk").length || 1;
-
-    const lastMonthChange = {
-      totalScans: (((totalScans - prevTotal) / prevTotal) * 100).toFixed(1),
-      allergensDetected: (((allergensDetected - prevAllergens) / prevAllergens) * 100).toFixed(1),
-      safeFoods: (safeFoods - prevSafeFoods).toFixed(1),
-      riskAlerts: (((riskAlerts - prevRisks) / prevRisks) * 100).toFixed(1),
-    };
-
-    setSummary({ totalScans, allergensDetected, safeFoods, riskAlerts, lastMonthChange });
-
-    // === Weekly Scan Activity ===
+  // 🔹 Helper: compute weekly trend from scan dates
+  const computeWeeklyData = (scans) => {
     const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-    const weekCount = days.map(day => ({
-      day,
-      scans: stored.filter(s => days[new Date(s.dateTime).getDay()] === day).length,
-    }));
-    setWeeklyData(weekCount);
+    const weeklyCount = days.map((d) => ({ day: d, scans: 0 }));
 
-    // === Allergen Distribution ===
-    const allergenMap = {};
-    stored.forEach(s => {
-      s.allergens.forEach(a => {
-        allergenMap[a] = (allergenMap[a] || 0) + 1;
+    scans.forEach((scan) => {
+      const day = new Date(scan.dateTime).getDay();
+      weeklyCount[day].scans += 1;
+    });
+    return weeklyCount;
+  };
+
+  // 🔹 Helper: compute allergen frequency
+  const computeAllergenData = (scans) => {
+    const counts = {};
+    scans.forEach((s) => {
+      s.allergens?.forEach((a) => {
+        counts[a] = (counts[a] || 0) + 1;
       });
     });
-    const allergenArray = Object.keys(allergenMap).map(k => ({
-      name: k,
-      value: allergenMap[k],
-    }));
-    setAllergenData(allergenArray.length ? allergenArray : [{ name: "No Allergens", value: 1 }]);
 
-    // === Food Categories ===
-    const categoryMap = {};
-    stored.forEach(s => {
-      const cat = s.category || "Others";
-      if (!categoryMap[cat]) categoryMap[cat] = { safe: 0, unsafe: 0 };
-      if (s.safetyStatus === "Safe") categoryMap[cat].safe++;
-      else categoryMap[cat].unsafe++;
+    const entries = Object.entries(counts).map(([name, value]) => ({
+      name,
+      value,
+    }));
+
+    if (entries.length === 0) {
+      return [{ name: "No Allergens", value: 1 }];
+    }
+
+    return entries;
+  };
+
+  // 🔹 Helper: compute category safe vs unsafe (based on foodItem keywords)
+  const computeFoodData = (scans) => {
+    const categories = {
+      Snacks: 0,
+      Dairy: 0,
+      Grains: 0,
+      Proteins: 0,
+      Beverages: 0,
+    };
+
+    const safe = { ...categories };
+    const unsafe = { ...categories };
+
+    scans.forEach((s) => {
+      const item = s.foodItem.toLowerCase();
+      let category = "Snacks";
+      if (item.includes("milk") || item.includes("cheese")) category = "Dairy";
+      else if (item.includes("rice") || item.includes("bread")) category = "Grains";
+      else if (item.includes("chicken") || item.includes("egg")) category = "Proteins";
+      else if (item.includes("juice") || item.includes("tea")) category = "Beverages";
+
+      if (s.safetyStatus === "Safe") safe[category] += 1;
+      else unsafe[category] += 1;
     });
 
-    const categoryArray = Object.keys(categoryMap).map(k => ({
-      category: k,
-      safe: categoryMap[k].safe,
-      unsafe: categoryMap[k].unsafe,
+    return Object.keys(categories).map((cat) => ({
+      category: cat,
+      safe: safe[cat],
+      unsafe: unsafe[cat],
     }));
-    setFoodData(categoryArray);
+  };
+
+  // 🔹 Load and process data
+  const loadReportsData = () => {
+    const stored = JSON.parse(localStorage.getItem("scanHistory")) || [];
+    setScanHistory(stored);
+
+    const totalScans = stored.length;
+    const allergensDetected = stored.filter((s) => s.allergens?.length > 0).length;
+    const safeFoods = Math.round(
+      (stored.filter((s) => s.safetyStatus === "Safe").length / (totalScans || 1)) * 100
+    );
+    const riskAlerts = stored.filter((s) => s.safetyStatus === "Risk").length;
+
+    setSummary({ totalScans, allergensDetected, safeFoods, riskAlerts });
+    setWeeklyData(computeWeeklyData(stored));
+    setAllergenData(computeAllergenData(stored));
+    setFoodData(computeFoodData(stored));
   };
 
   useEffect(() => {
-    calculateStats();
-    window.addEventListener("scan-updated", calculateStats);
-    return () => window.removeEventListener("scan-updated", calculateStats);
-  }, []);
+    loadReportsData();
 
-  const formatChange = val =>
-    val > 0 ? `+${val}% vs last month` : `${val}% vs last month`;
+    // 🔄 Auto-refresh on scan updates
+    const updateHandler = () => {
+      console.log("📊 Reports updated from new scan");
+      loadReportsData();
+    };
+    window.addEventListener("scan-updated", updateHandler);
+    return () => window.removeEventListener("scan-updated", updateHandler);
+  }, []);
 
   return (
     <div className="reports-container">
@@ -132,60 +131,34 @@ const Reports = () => {
         Detailed insights into your allergen scanning patterns
       </p>
 
-      {/* ===== Summary Cards ===== */}
+      {/* Summary Cards */}
       <div className="reports-cards">
         <div className="report-card">
           <p className="card-label">Total Scans</p>
           <h2 className="card-value">{summary.totalScans}</h2>
-          <p
-            className={`card-change ${
-              summary.lastMonthChange.totalScans >= 0 ? "positive" : "negative"
-            }`}
-          >
-            {formatChange(summary.lastMonthChange.totalScans)}
-          </p>
+          <p className="card-change positive">Live data</p>
         </div>
 
         <div className="report-card">
           <p className="card-label">Allergens Detected</p>
           <h2 className="card-value warning">{summary.allergensDetected}</h2>
-          <p
-            className={`card-change ${
-              summary.lastMonthChange.allergensDetected >= 0
-                ? "positive"
-                : "negative"
-            }`}
-          >
-            {formatChange(summary.lastMonthChange.allergensDetected)}
-          </p>
+          <p className="card-change negative">Auto-updating</p>
         </div>
 
         <div className="report-card">
           <p className="card-label">Safe Foods</p>
           <h2 className="card-value success">{summary.safeFoods}%</h2>
-          <p
-            className={`card-change ${
-              summary.lastMonthChange.safeFoods >= 0 ? "positive" : "negative"
-            }`}
-          >
-            {formatChange(summary.lastMonthChange.safeFoods)}
-          </p>
+          <p className="card-change positive">Healthy choices</p>
         </div>
 
         <div className="report-card">
           <p className="card-label">Risk Alerts</p>
           <h2 className="card-value danger">{summary.riskAlerts}</h2>
-          <p
-            className={`card-change ${
-              summary.lastMonthChange.riskAlerts >= 0 ? "positive" : "negative"
-            }`}
-          >
-            {formatChange(summary.lastMonthChange.riskAlerts)}
-          </p>
+          <p className="card-change negative">Monitor closely</p>
         </div>
       </div>
 
-      {/* ===== Charts ===== */}
+      {/* Charts Section */}
       <div className="chart-section">
         <div className="chart-card">
           <h3>Weekly Scan Activity</h3>
@@ -213,7 +186,6 @@ const Reports = () => {
               cx="50%"
               cy="50%"
               outerRadius={70}
-              fill="#8884d8"
               label
             >
               {allergenData.map((entry, index) => (
@@ -226,8 +198,9 @@ const Reports = () => {
         </div>
       </div>
 
+      {/* Food Category Chart */}
       <div className="chart-card full-width">
-        <h3>Food Categories</h3>
+        <h3>Food Categories (Safe vs Unsafe)</h3>
         <BarChart width={800} height={300} data={foodData}>
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="category" />

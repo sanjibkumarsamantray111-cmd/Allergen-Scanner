@@ -1,12 +1,11 @@
-
-
-
 import express from "express";
 import multer from "multer";
 import axios from "axios";
 import dotenv from "dotenv";
 import fs from "fs";
 import Scan from "../models/Scan.js";
+import User from "../models/User.js";
+import Profile from "../models/Profile.js";
 import protect from "../middleware/authMiddleware.js";
 
 dotenv.config();
@@ -14,79 +13,127 @@ dotenv.config();
 const router = express.Router();
 const upload = multer({ dest: "uploads/" });
 
-// Helper function to compute safety %
-const calculateSafety = (matchedCount, total) => {
-  if (matchedCount === 0) return 100;
-  const risk = Math.min((matchedCount / total) * 100, 100);
-  return Math.max(0, 100 - risk * 1.5);
-};
-
-// Gemini API info
 const FOOD_SCAN_API_URL =
   "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
-const FOOD_SCAN_API_KEY = process.env.FOOD_SCAN_API_KEY; // or FOOD_SCAN_API_KEY
+const FOOD_SCAN_API_KEY = process.env.FOOD_SCAN_API_KEY;
 
+// ✅ Helper to calculate safety percentage
+const calculateSafety = (matched, total) => {
+  if (total === 0) return 100;
+  const ratio = matched / total;
+  return Math.max(0, Math.round((1 - ratio) * 100));
+};
+
+// ✅ Simple alternatives (you can expand this)
+const ALTERNATIVES = {
+  dairy: ["plant-based milk", "soy-free cheese", "coconut milk"],
+  gluten: ["gluten-free bread", "rice", "quinoa"],
+  peanuts: ["sunflower butter", "almond butter (if safe)"],
+  "tree nuts": ["seeds", "sunflower butter"],
+  soy: ["pea protein", "lentils"],
+  egg: ["flax egg", "applesauce"],
+  fish: ["chicken", "tofu (if safe)"],
+  shellfish: ["plant protein", "tofu"],
+};
+
+// ✅ ROUTE: /api/scan
 router.post("/", protect, upload.single("image"), async (req, res) => {
   try {
-    if (!req.file) {
-      return res.status(400).json({ message: "No image uploaded" });
-    }
+    if (!req.file) return res.status(400).json({ message: "No image uploaded" });
 
     const userId = req.user._id || req.user.id;
+    const user = await User.findById(userId);
 
-    // Read image and encode as Base64
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+const userAllergens = (user.allergens || []).map((a) => a.toLowerCase().trim()).filter(Boolean);
+
+console.log("🧾 User Allergens from DB:", userAllergens);
+    // 🔹 Read and encode the uploaded image
     const imageBase64 = fs.readFileSync(req.file.path, { encoding: "base64" });
 
-    const allergens = [
-      { name: "Gluten-Free", confidence: Math.floor(Math.random() * 20) + 80 },
-      { name: "Dairy-Free", confidence: Math.floor(Math.random() * 20) + 75 },
-      { name: "Nut-Free", confidence: Math.floor(Math.random() * 20) + 70 },
-    ];
+    // 🔹 Gemini prompt for better structured output
+    const prompt = `
+You are a food analysis assistant.
+Analyze this food image and provide results in strict JSON format:
+{
+  "ingredients": [list of visible or likely ingredients],
+  "description": "short summary of what food might be"
+}
+`;
 
-// Call Gemini API (use single request that passes key in the URL)
-const apiResponse = await axios.post(
-  `${FOOD_SCAN_API_URL}?key=${FOOD_SCAN_API_KEY}`,
-  {
-    contents: [
+    // 🔹 Call Gemini API
+    const apiResponse = await axios.post(
+      `${FOOD_SCAN_API_URL}?key=${FOOD_SCAN_API_KEY}`,
       {
-        parts: [
-          { text: "Identify all visible ingredients or allergens in this food photo. we are attaching/sharing user allegrens list and cofnidence " + JSON.stringify(allergens) + ". compare the ingredients present in scanned food and user allergens and tell us if food is safe for user or not. if not safe mention allegens. " },
+        contents: [
           {
-            inline_data: {
-              mime_type: req.file.mimetype,
-              data: imageBase64,
-            },
+            parts: [
+              { text: prompt },
+              {
+                inline_data: {
+                  mime_type: req.file.mimetype,
+                  data: imageBase64,
+                },
+              },
+            ],
           },
         ],
       },
-    ],
-  },
-  { headers: { "Content-Type": "application/json" } }
-);
+      { headers: { "Content-Type": "application/json" } }
+    );
 
-// 🧠 Debug log to inspect what Gemini returns
-console.log("🧠 Gemini API Raw Response:");
-console.log(JSON.stringify(apiResponse.data, null, 2));
+    const aiRaw =
+      apiResponse.data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
+    console.log("🧠 Gemini Raw Output:", aiRaw);
 
-    // Parse Gemini output
-    const aiText =
-      apiResponse.data?.candidates?.[0]?.content?.parts?.[0]?.text ||
-      "No allergens detected";
+    // ✅ Try parsing the JSON from AI text safely
+    let aiData = {};
+    try {
+      aiData = JSON.parse(aiRaw.match(/\{[\s\S]*\}/)?.[0] || "{}");
+    } catch (e) {
+      console.warn("⚠️ AI JSON parse fallback:", e.message);
+      aiData = { ingredients: aiRaw.split(",").map((i) => i.trim()) };
+    }
 
-    const detectedAllergens = aiText.split(",").map((a) => a.trim());
+    const ingredients = (aiData.ingredients || []).map((i) =>
+      i.toLowerCase().trim()
+    );
 
-    // Random safety % logic (you can refine later)
-    const safetyPercent = Math.floor(Math.random() * 40) + 60;
+    // ✅ Match allergens
+    const detectedAllergens = ingredients.filter((ing) =>
+      userAllergens.some(
+        (alg) => ing.includes(alg) || alg.includes(ing)
+      )
+    );
+
+    // ✅ Suggest alternatives
+    const alternatives = {};
+    detectedAllergens.forEach((alg) => {
+      const key = Object.keys(ALTERNATIVES).find(
+        (k) => k === alg || alg.includes(k)
+      );
+      alternatives[alg] = key ? ALTERNATIVES[key] : ["No specific alternatives found"];
+    });
+
+    // ✅ Calculate safety percentage
+    const safetyPercent = calculateSafety(
+      detectedAllergens.length,
+      ingredients.length
+    );
+
     const safetyStatus =
       safetyPercent > 90
         ? "Safe"
-        : safetyPercent > 75
-        ? "Moderate"
-        : "Unsafe";
+        : safetyPercent > 70
+        ? "Moderate Risk"
+        : "High Risk";
 
+    // ✅ Save scan result to DB
     const newScan = new Scan({
       user: userId,
       foodItem: req.file.originalname.split(".")[0],
+      ingredients,
       allergens: detectedAllergens,
       safetyStatus,
       safetyPercent,
@@ -95,21 +142,29 @@ console.log(JSON.stringify(apiResponse.data, null, 2));
 
     await newScan.save();
 
+    // ✅ Respond with clean structured data
     res.status(200).json({
-      message: "Scan completed successfully",
+      message: "✅ Scan completed successfully",
       foodItem: req.file.originalname,
+      description: aiData.description || "No description available",
+      ingredients,
+      detectedAllergens,
+      alternatives,
       safetyPercent,
       safetyStatus,
-      detectedAllergens,
-      aiText,
       savedScan: newScan,
     });
   } catch (error) {
-    console.error("Error processing scan:", error.response?.data || error.message);
+    console.error("❌ Error processing scan:", error.response?.data || error.message);
     res.status(500).json({
       message: "Error processing scan",
       error: error.response?.data || error.message,
     });
+  } finally {
+    // Optional: delete uploaded image after processing
+    try {
+      fs.unlinkSync(req.file.path);
+    } catch {}
   }
 });
 

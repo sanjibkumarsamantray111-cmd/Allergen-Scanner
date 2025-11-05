@@ -1,10 +1,7 @@
 import mongoose from "mongoose";
 
 const foodSchema = new mongoose.Schema({
-  name: String,
-  calories: Number,
-  category: String,
-  addedAt: { type: Date, default: Date.now },
+  allergen: { type: String, required: true }, // only allergen, nothing else
 });
 
 const profileSchema = new mongoose.Schema({
@@ -13,7 +10,7 @@ const profileSchema = new mongoose.Schema({
   dob: String,
   phone: String,
   location: String,
-  foods: [foodSchema],
+  foods: [foodSchema], // still named "foods" to avoid breaking your frontend
 });
 
 export default mongoose.model("Profile", profileSchema);

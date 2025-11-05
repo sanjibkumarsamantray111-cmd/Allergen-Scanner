@@ -1,4 +1,3 @@
-// 
 import { useEffect, useState } from "react";
 import "./ScanHistory.css";
 
@@ -7,22 +6,33 @@ export default function ScanHistory() {
   const [summary, setSummary] = useState({});
   const [loading, setLoading] = useState(true);
 
-  // Load from localStorage
   const fetchData = () => {
     try {
       const stored = JSON.parse(localStorage.getItem("scanHistory")) || [];
-      setScans(stored);
 
-      const totalScans = stored.length;
-      const allergensDetected = stored.filter(s => s.allergens.length > 0).length;
+      // ✅ Keep all valid scans that have at least a timestamp
+      const validScans = stored.filter((s) => s.dateTime);
+
+      console.log("📦 Loaded scans:", validScans);
+      setScans(validScans);
+
+      // ✅ Compute summary stats
+      const totalScans = validScans.length;
+      const allergensDetected = validScans.filter(
+        (s) => s.allergens?.length > 0
+      ).length;
       const safeFoods = Math.round(
-        (stored.filter(s => s.safetyStatus === "Safe").length / (totalScans || 1)) * 100
+        (validScans.filter((s) => s.safetyStatus === "Safe").length /
+          (totalScans || 1)) *
+          100
       );
-      const riskAlerts = stored.filter(s => s.safetyStatus === "Risk").length;
+      const riskAlerts = validScans.filter(
+        (s) => s.safetyStatus === "Risk"
+      ).length;
 
       setSummary({ totalScans, allergensDetected, safeFoods, riskAlerts });
     } catch (err) {
-      console.error("Error loading history:", err);
+      console.error("❌ Error loading history:", err);
     } finally {
       setLoading(false);
     }
@@ -30,8 +40,15 @@ export default function ScanHistory() {
 
   useEffect(() => {
     fetchData();
-    window.addEventListener("scan-updated", fetchData);
-    return () => window.removeEventListener("scan-updated", fetchData);
+
+    // ✅ Listen for updates from QuickScan
+    const handleUpdate = () => {
+      console.log("🔄 Scan history updated event received");
+      fetchData();
+    };
+
+    window.addEventListener("scan-updated", handleUpdate);
+    return () => window.removeEventListener("scan-updated", handleUpdate);
   }, []);
 
   if (loading) {
@@ -91,8 +108,10 @@ export default function ScanHistory() {
             <tbody>
               {scans.map((scan, index) => (
                 <tr key={index}>
-                  <td>{scan.foodItem}</td>
-                  <td>{scan.allergens?.length ? scan.allergens.join(", ") : "None"}</td>
+                  <td>{scan.foodItem || "Unknown Food"}</td>
+                  <td>
+                    {scan.allergens?.length ? scan.allergens.join(", ") : "None"}
+                  </td>
                   <td>
                     <span
                       className={`status-badge ${
@@ -125,4 +144,3 @@ export default function ScanHistory() {
     </div>
   );
 }
-
