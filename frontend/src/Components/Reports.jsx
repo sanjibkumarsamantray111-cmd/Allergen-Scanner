@@ -192,8 +192,8 @@ const Reports = () => {
                 <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
               ))}
             </Pie>
-            <Legend />
-            <Tooltip />
+            
+            <Tooltip />w
           </PieChart>
         </div>
       </div>

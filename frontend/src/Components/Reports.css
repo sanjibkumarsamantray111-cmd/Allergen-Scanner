@@ -4,6 +4,9 @@
   padding: 30px;
   font-family: "Poppins", sans-serif;
   color: #333;
+position: relative;
+  z-index: 1;
+  
 }
 
 .reports-title {
@@ -92,4 +95,22 @@
 
 .chart-card.full-width {
   grid-column: 1 / -1;
+}
+
+/* .reports-container {
+  background-color: #f0f8f4;
+  min-height: 100vh;
+  padding: 30px;
+  font-family: "Poppins", sans-serif;
+  color: #333;
+  position: relative;
+  z-index: 1;
+} */
+
+.chart-card {
+  overflow: hidden;
+}
+
+.recharts-wrapper {
+  max-width: 100%;
 }

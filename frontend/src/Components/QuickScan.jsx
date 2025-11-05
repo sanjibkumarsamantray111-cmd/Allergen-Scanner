@@ -14,6 +14,7 @@ const QuickScan = () => {
   const [alternatives, setAlternatives] = useState({});
   const [userAllergens, setUserAllergens] = useState([]);
 
+  // ✅ Fetch user's allergen preferences
   useEffect(() => {
     const fetchUserAllergens = async () => {
       try {
@@ -30,6 +31,16 @@ const QuickScan = () => {
     fetchUserAllergens();
   }, []);
 
+  // ✅ Convert image to base64 for saving in localStorage
+  const toBase64 = (file) =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = (error) => reject(error);
+    });
+
+  // ✅ Handle file upload
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -53,6 +64,7 @@ const QuickScan = () => {
     setAlternatives({});
   };
 
+  // ✅ Scan image and save results
   const handleScan = async () => {
     if (!uploadedImage) return;
     setLoading(true);
@@ -81,9 +93,11 @@ const QuickScan = () => {
       const normalizedUserAllergens = userAllergens.map((a) =>
         a.toLowerCase().trim()
       );
+
       const matched = normalizedUserAllergens.filter((allergen) =>
         normalizedIngredients.some((ing) => ing.includes(allergen))
       );
+
       setDetectedAllergens(matched);
 
       const safety = matched.length === 0 ? 100 : 50;
@@ -98,6 +112,7 @@ const QuickScan = () => {
         sugar: ["stevia", "monk fruit"],
         maggies: ["other instant noodles"],
       };
+
       const matchedAlternatives = {};
       matched.forEach((a) => {
         if (allergenAlternatives[a.toLowerCase()]) {
@@ -107,6 +122,28 @@ const QuickScan = () => {
       setAlternatives(matchedAlternatives);
 
       setScanResultText("Analysis complete ✅");
+
+      // ✅ Save scan details (including image) to localStorage
+      const imageBase64 = await toBase64(uploadedImage);
+
+      const newScan = {
+        foodItem: uploadedImage.name || "Unknown Food",
+        allergens: matched,
+        safetyStatus:
+          safety > 90 ? "Safe" : safety > 70 ? "Moderate" : "Risk",
+        safetyPercent: safety,
+        dateTime: new Date().toISOString(),
+        image: imageBase64, // ✅ Store the scanned image
+      };
+
+      const existing = JSON.parse(localStorage.getItem("scanHistory")) || [];
+      const updated = [newScan, ...existing];
+      localStorage.setItem("scanHistory", JSON.stringify(updated));
+
+      // ✅ Notify ScanHistory to refresh
+      window.dispatchEvent(new Event("scan-updated"));
+
+      toast.success("Scan saved to history ✅");
     } catch (err) {
       console.error("❌ Scan failed:", err);
       setScanResultText("Error analyzing image.");

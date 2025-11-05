@@ -25,12 +25,14 @@ const AuthModal = ({ closeModal }) => {
     setLoading(true);
     try {
       if (isLogin) {
+         localStorage.clear();
         const res = await axios.post("http://localhost:5000/api/auth/login", {
           email: formData.email,
           password: formData.password,
         });
 
         localStorage.setItem("token", res.data.token);
+        localStorage.setItem("userData", JSON.stringify(res.data.user));
         setMessage(res.data.message || "Logged in");
         setMessageType("success");
 
@@ -39,6 +41,7 @@ const AuthModal = ({ closeModal }) => {
           navigate("/dashboard");
         }, 600);
       } else {
+        localStorage.clear();
         const res = await axios.post("http://localhost:5000/api/auth/register", {
           name: formData.name,
           email: formData.email,
