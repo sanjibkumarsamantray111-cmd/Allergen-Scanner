@@ -1,40 +1,10 @@
-// import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
-// import Home from "./Components/Home";
-// // import SignUp from "./Components/SignUp";
-// import Dashboard from "./Components/Dashboard";
-// import MyProfile from "./Components/MyProfile";
-// import Home1 from "./Components/Home1";
-
-// function App() {
-//   const token = localStorage.getItem("token");
-
-//   return (
-//     <Router>
-//       <Routes>
-//         {/* Redirect to dashboard if already logged in */}
-//         <Route path="/" element={token ? <Navigate to="/dashboard" /> : <Home />} />
-//         {/* <Route path="/signup" element={<SignUp />} /> */}
-//         <Route path="/dashboard" element={<Dashboard />} />
-//         <Route
-//           path="/myprofile"
-//           element={token ? <MyProfile /> : <Navigate to="/dashboard" />}
-//         />
-       
-
-//       </Routes>
-//     </Router>
-//   );
-// }   
-
-// export default App;
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Home from "./Components/Home";
-// import SignUp from "./Components/SignUp";
 import Dashboard from "./Components/Dashboard";
 import MyProfile from "./Components/MyProfile";
 import Home1 from "./Components/Home1";
-
-// ✅ 1. Import Toaster from react-hot-toast
+import ForgotPassword from "./Components/ForgotPassword";
+import ResetPassword from "./Components/ResetPassword";
 import { Toaster } from "react-hot-toast";
 
 function App() {
@@ -42,7 +12,6 @@ function App() {
 
   return (
     <Router>
-      {/* ✅ 2. Add the Toaster here (once globally) */}
       <Toaster
         position="top-right"
         toastOptions={{
@@ -56,24 +25,15 @@ function App() {
       />
 
       <Routes>
-        {/* Redirect to dashboard if already logged in */}
-        <Route
-          path="/"
-          element={token ? <Navigate to="/dashboard" /> : <Home />}
-        />
-        {/* <Route path="/signup" element={<SignUp />} /> */}
+        <Route path="/" element={token ? <Navigate to="/dashboard" /> : <Home />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password/:token" element={<ResetPassword />} />
         <Route path="/dashboard" element={<Dashboard />} />
-        <Route
-          path="/myprofile"
-          element={token ? <MyProfile /> : <Navigate to="/dashboard" />}
-        />
+        <Route path="/myprofile" element={token ? <MyProfile /> : <Navigate to="/dashboard" />} />
+        <Route path="/home1" element={<Home1 />} />
       </Routes>
     </Router>
   );
 }
 
 export default App;
-
-
-
-

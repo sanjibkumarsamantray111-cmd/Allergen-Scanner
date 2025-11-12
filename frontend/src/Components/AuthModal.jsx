@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "./AuthModal.css";
-import { Eye, EyeOff } from "lucide-react"; // 👁 import icons
+import { Eye, EyeOff } from "lucide-react";
 import heroBg from "../assets/Gemini_Generated_Image_wwxt2mwwxt2mwwxt.png";
 
 const AuthModal = ({ closeModal }) => {
@@ -11,7 +11,7 @@ const AuthModal = ({ closeModal }) => {
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState("");
   const [loading, setLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false); // 👁 state to toggle visibility
+  const [showPassword, setShowPassword] = useState(false);
 
   const navigate = useNavigate();
 
@@ -23,9 +23,12 @@ const AuthModal = ({ closeModal }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+
     try {
+      localStorage.clear();
+
       if (isLogin) {
-         localStorage.clear();
+        // 🔹 LOGIN FLOW
         const res = await axios.post("http://localhost:5000/api/auth/login", {
           email: formData.email,
           password: formData.password,
@@ -33,7 +36,7 @@ const AuthModal = ({ closeModal }) => {
 
         localStorage.setItem("token", res.data.token);
         localStorage.setItem("userData", JSON.stringify(res.data.user));
-        setMessage(res.data.message || "Logged in");
+        setMessage(res.data.message || "Logged in successfully!");
         setMessageType("success");
 
         setTimeout(() => {
@@ -41,16 +44,26 @@ const AuthModal = ({ closeModal }) => {
           navigate("/dashboard");
         }, 600);
       } else {
-        localStorage.clear();
+        // 🔹 REGISTER → AUTO-LOGIN → SHOW PROFILE POPUP ON DASHBOARD
         const res = await axios.post("http://localhost:5000/api/auth/register", {
           name: formData.name,
           email: formData.email,
           password: formData.password,
         });
 
-        setMessage(res.data.message || "Registered");
+        if (res.data.token) localStorage.setItem("token", res.data.token);
+        if (res.data.user) localStorage.setItem("userData", JSON.stringify(res.data.user));
+
+        // ✅ Mark this user as "newly registered"
+        localStorage.setItem("isNewAccount", "true");
+
+        setMessage(res.data.message || "Registered successfully!");
         setMessageType("success");
-        setIsLogin(true);
+
+        setTimeout(() => {
+          if (typeof closeModal === "function") closeModal();
+          navigate("/dashboard"); // Go to dashboard, not login
+        }, 600);
       }
     } catch (err) {
       setMessage(err.response?.data?.message || "Something went wrong!");
@@ -113,28 +126,34 @@ const AuthModal = ({ closeModal }) => {
               />
 
               {/* 👁 Password input with eye toggle */}
-<div className="password-container">
-  <input
-    type={showPassword ? "text" : "password"}
-    name="password"
-    placeholder="Password"
-    value={formData.password}
-    onChange={handleInputChange}
-    required
-  />
-  <span
-    className="eye-icon"
-    onClick={() => setShowPassword(!showPassword)}
-  >
-    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-  </span>
-</div>
-
+              <div className="password-container">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  name="password"
+                  placeholder="Password"
+                  value={formData.password}
+                  onChange={handleInputChange}
+                  required
+                />
+                <span
+                  className="eye-icon"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </span>
+              </div>
 
               {isLogin && (
-                <a href="#" className="forgot-link" onClick={(e) => e.preventDefault()}>
+                <button
+                  type="button"
+                  className="forgot-link"
+                  onClick={() => {
+                    if (typeof closeModal === "function") closeModal();
+                    navigate("/forgot-password");
+                  }}
+                >
                   Forgot Password?
-                </a>
+                </button>
               )}
 
               <button type="submit" className="main-btn" disabled={loading}>

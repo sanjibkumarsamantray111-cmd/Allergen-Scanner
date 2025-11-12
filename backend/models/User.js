@@ -3,7 +3,17 @@ import mongoose from "mongoose";
 const userSchema = new mongoose.Schema({
   name: String,
   email: { type: String, unique: true },
-  password: String,
+password: {
+    type: String,
+    required: true,
+  },
+  resetToken: {
+    type: String,
+  },
+  resetTokenExpiry: {
+    type: Date,
+  },
+
   profileCreated: { type: Boolean, default: false },
    foodItems: { type: Array, default: [] },
 

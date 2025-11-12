@@ -1,8 +1,8 @@
 /* Toggle Button */
 .sidebar-toggle {
   position: fixed;
-  top: 20px;
-  left: 20px;
+  top: 10px;
+  left: 10px;
   z-index: 2000;
   background-color: #d8f3dc;
   border: none;
@@ -17,7 +17,7 @@
 
 /* When sidebar is open, move toggle beside it */
 .sidebar-toggle.active {
-  left: calc(250px + 20px); /* Sidebar width (250px) + gap (20px) */
+  left: calc(240px + 20px); /* Sidebar width (250px) + gap (20px) */
 }
 
 /* Sidebar */

@@ -10,7 +10,7 @@ const profileSchema = new mongoose.Schema({
   dob: String,
   phone: String,
   location: String,
-  foods: [foodSchema], // still named "foods" to avoid breaking your frontend
+  foods: [foodSchema], 
 });
 
 export default mongoose.model("Profile", profileSchema);

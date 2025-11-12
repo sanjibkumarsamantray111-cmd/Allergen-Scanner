@@ -14,7 +14,6 @@ const QuickScan = () => {
   const [alternatives, setAlternatives] = useState({});
   const [userAllergens, setUserAllergens] = useState([]);
 
-  // ✅ Fetch user's allergen preferences
   useEffect(() => {
     const fetchUserAllergens = async () => {
       try {
@@ -31,7 +30,6 @@ const QuickScan = () => {
     fetchUserAllergens();
   }, []);
 
-  // ✅ Convert image to base64 for saving in localStorage
   const toBase64 = (file) =>
     new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -40,7 +38,6 @@ const QuickScan = () => {
       reader.onerror = (error) => reject(error);
     });
 
-  // ✅ Handle file upload
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -64,7 +61,6 @@ const QuickScan = () => {
     setAlternatives({});
   };
 
-  // ✅ Scan image and save results
   const handleScan = async () => {
     if (!uploadedImage) return;
     setLoading(true);
@@ -123,7 +119,6 @@ const QuickScan = () => {
 
       setScanResultText("Analysis complete ✅");
 
-      // ✅ Save scan details (including image) to localStorage
       const imageBase64 = await toBase64(uploadedImage);
 
       const newScan = {
@@ -133,16 +128,14 @@ const QuickScan = () => {
           safety > 90 ? "Safe" : safety > 70 ? "Moderate" : "Risk",
         safetyPercent: safety,
         dateTime: new Date().toISOString(),
-        image: imageBase64, // ✅ Store the scanned image
+        image: imageBase64,
       };
 
       const existing = JSON.parse(localStorage.getItem("scanHistory")) || [];
       const updated = [newScan, ...existing];
       localStorage.setItem("scanHistory", JSON.stringify(updated));
 
-      // ✅ Notify ScanHistory to refresh
       window.dispatchEvent(new Event("scan-updated"));
-
       toast.success("Scan saved to history ✅");
     } catch (err) {
       console.error("❌ Scan failed:", err);
@@ -156,8 +149,9 @@ const QuickScan = () => {
 
   return (
     <div className="quickscan-container">
-      <h1>Quick Scan</h1>
+      <h1 className="title">Quick Scan</h1>
 
+      {/* Upload section */}
       {!uploadedImage && (
         <div className="upload-section card">
           <label className="upload-btn">
@@ -166,12 +160,13 @@ const QuickScan = () => {
               type="file"
               accept="image/*"
               onChange={handleFileChange}
-              style={{ display: "none" }}
+              hidden
             />
           </label>
         </div>
       )}
 
+      {/* Image preview before scan */}
       {uploadedImage && !scanned && (
         <div className="upload-section card">
           <img
@@ -180,17 +175,21 @@ const QuickScan = () => {
             className="preview-img"
           />
           <div className="btn-group">
-            <button onClick={handleScan} disabled={loading}>
+            <button className="primary-btn" onClick={handleScan} disabled={loading}>
               {loading ? "Analyzing..." : "Analyze"}
             </button>
-            <button onClick={handleReupload}>Cancel</button>
+            <button className="secondary-btn" onClick={handleReupload}>
+              Cancel
+            </button>
           </div>
         </div>
       )}
 
+      {/* Scan results */}
       {scanned && (
         <div className="result-section card">
-          <h3>{scanResultText}</h3>
+          <h3 className="result-heading">{scanResultText}</h3>
+
           <img
             src={URL.createObjectURL(uploadedImage)}
             alt="scanned"
@@ -198,32 +197,27 @@ const QuickScan = () => {
           />
 
           <div className="cards-grid">
+            {/* Ingredients */}
             <div className="result-card">
               <h4>Ingredients Detected</h4>
               {ingredients.length ? (
-                <ul>
-                  {ingredients.map((i, idx) => (
-                    <li key={idx}>{i}</li>
-                  ))}
-                </ul>
+                <ul>{ingredients.map((i, idx) => <li key={idx}>{i}</li>)}</ul>
               ) : (
                 <p>No ingredients detected</p>
               )}
             </div>
 
+            {/* Allergens */}
             <div className="result-card">
               <h4>Matched Allergens</h4>
               {detectedAllergens.length ? (
-                <ul>
-                  {detectedAllergens.map((a, idx) => (
-                    <li key={idx}>{a}</li>
-                  ))}
-                </ul>
+                <ul>{detectedAllergens.map((a, idx) => <li key={idx}>{a}</li>)}</ul>
               ) : (
                 <p>No matched allergens</p>
               )}
             </div>
 
+            {/* Safety */}
             <div className="result-card safety-card">
               <h4>Safety</h4>
               {safetyPercent !== null ? (
@@ -243,17 +237,14 @@ const QuickScan = () => {
               )}
             </div>
 
+            {/* Alternatives */}
             {Object.keys(alternatives).length > 0 && (
               <div className="result-card">
                 <h4>Alternatives</h4>
                 {Object.entries(alternatives).map(([alg, list]) => (
                   <div key={alg} className="alt-item">
                     <strong>{alg}</strong>
-                    <ul>
-                      {list.map((alt, i) => (
-                        <li key={i}>{alt}</li>
-                      ))}
-                    </ul>
+                    <ul>{list.map((alt, i) => <li key={i}>{alt}</li>)}</ul>
                   </div>
                 ))}
               </div>
@@ -261,7 +252,9 @@ const QuickScan = () => {
           </div>
 
           <div className="scan-again">
-            <button onClick={handleReupload}>Scan another</button>
+            <button className="primary-btn" onClick={handleReupload}>
+              Scan Another
+            </button>
           </div>
         </div>
       )}

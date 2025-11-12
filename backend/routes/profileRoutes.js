@@ -5,11 +5,7 @@ import protect from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-/* =========================================================
-   ✅ Add allergen item to user's profile (stores in foods[])
-   ========================================================= */
-// ✅ Add allergen
-// ✅ Add allergen
+
 router.put("/add-allergen", protect, async (req, res) => {
   const { allergen } = req.body;
 

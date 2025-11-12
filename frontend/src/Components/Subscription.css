@@ -382,7 +382,7 @@
   overflow: hidden;
   box-shadow: 0 16px 48px rgba(0, 0, 0, 0.08);
 }
-
+ 
 .table-header {
   display: grid;
   grid-template-columns: 2fr 1fr 1fr;
@@ -423,12 +423,13 @@
 }
 
 .value-cell {
-  justify-content: center;
+  justify-content: left;
   color: #6b8477;
   font-weight: 500;
 }
 
 .premium-cell {
+  justify-content:left;
   font-weight: 600;
   color: #2d4739;
 }

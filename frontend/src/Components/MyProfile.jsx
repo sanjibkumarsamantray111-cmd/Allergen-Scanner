@@ -160,7 +160,7 @@ function Profile() {
             </div>
             <div>
               <p className="label">Location</p>
-              <p>{profile.location || "Unknown"}</p>
+              <p>{profile.location || "Not provided"}</p>
             </div>
           </div>
         </div>
@@ -183,52 +183,63 @@ function Profile() {
       </div>
 
       {/* EDIT MODAL */}
-      {showEditModal && (
-        <div className="modal-overlay">
-          <div className="modal glass-card">
-            <h2>Edit Profile</h2>
-            <input
-              type="text"
-              name="fullName"
-              placeholder="Full Name"
-              value={formData.fullName}
-              onChange={handleEditChange}
-            />
-            <input
-              type="text"
-              name="dob"
-              placeholder="Date of Birth"
-              value={formData.dob}
-              onChange={handleEditChange}
-            />
-            <input
-              type="text"
-              name="phone"
-              placeholder="Phone"
-              value={formData.phone}
-              onChange={handleEditChange}
-            />
-            <input
-              type="text"
-              name="location"
-              placeholder="Location"
-              value={formData.location}
-              onChange={handleEditChange}
-            />
-            <div className="modal-buttons">
-              <button onClick={handleSaveProfile} className="save-btn">
-                Save
-              </button>
-              <button
-                onClick={() => setShowEditModal(false)}
-                className="cancel-btn"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+  {/* EDIT MODAL */}
+{showEditModal && (
+  <div className="modal-overlay">
+    <div className="modal glass-card">
+      <h2>Edit Profile</h2>
+      <input
+        type="text"
+        name="fullName"
+        placeholder="Full Name"
+        value={formData.fullName}
+        onChange={handleEditChange}
+      />
+
+      {/* DOB input restricted to valid date */}
+      <input
+        type="date"
+        name="dob"
+        placeholder="Date of Birth"
+        value={formData.dob}
+        onChange={handleEditChange}
+        max={new Date().toISOString().split("T")[0]} // DOB cannot be in the future
+      />
+
+      {/* Phone input restricted to digits only */}
+      <input
+        type="tel"
+        name="phone"
+        placeholder="Phone (10 digits)"
+        value={formData.phone}
+        onChange={handleEditChange}
+        pattern="[0-9]{10}"
+        maxLength={10}
+        title="Enter a valid 10-digit phone number"
+      />
+
+      <input
+        type="text"
+        name="location"
+        placeholder="Location"
+        value={formData.location}
+        onChange={handleEditChange}
+      />
+
+      <div className="modal-buttons">
+        <button onClick={handleSaveProfile} className="save-btn">
+          Save
+        </button>
+        <button
+          onClick={() => setShowEditModal(false)}
+          className="cancel-btn"
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+)}
 
       {/* ADD ALLERGEN MODAL */}
       {showAllergenModal && (

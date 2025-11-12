@@ -13,6 +13,7 @@ import authRoutes from "./routes/authRoutes.js";
 import dashboardRoutes from "./routes/dashboardRoutes.js";
 import preferenceRoutes from "./routes/preferenceRoutes.js";
 import scanRoutes from "./routes/scanRoutes.js";
+import passwordRoutes from "./routes/passwordRoutes.js";
 
 dotenv.config();
 
@@ -35,6 +36,7 @@ app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/preferences", preferenceRoutes);
 app.use("/api/scan", scanRoutes);
 app.use("/api/profile", profileRoutes);
+app.use("/api/password", passwordRoutes);
 
 
 // --- GEMINI AI SETUP ---
