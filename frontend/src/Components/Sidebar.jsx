@@ -12,6 +12,7 @@ import {
   FaBars,
   FaTimes,
   FaBoxOpen,
+  FaHandHolding,
 } from "react-icons/fa";
 import "./sidebar.css";
 import logo from "../assets/Final Logo.png";
@@ -46,7 +47,7 @@ const Sidebar = ({ isOpen, setActivePage, handleLogout, toggleSidebar }) => {
     { label: "Reports", icon: <FaFileAlt />, path: "/dashboard/reports" },
     { label: "AI Assistant", icon: <FaRobot />, path: "/dashboard/assistant" },
     { label: "Learn", icon: <FaBook />, path: "/dashboard/learn" },
-    { label: "Subscription", icon: <FaBoxOpen />, path: "/dashboard/subscription" },
+    { label: "Subscription", icon: <FaHandHolding />, path: "/dashboard/subscription" },
   ];
 
   const handleMenuClick = (page, path) => {

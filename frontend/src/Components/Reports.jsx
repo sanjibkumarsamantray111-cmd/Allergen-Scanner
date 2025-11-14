@@ -6,12 +6,10 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  PieChart,
-  Pie,
-  Cell,
   BarChart,
   Bar,
   Legend,
+  ResponsiveContainer,
 } from "recharts";
 import "./Reports.css";
 
@@ -19,21 +17,16 @@ const Reports = () => {
   const [scanHistory, setScanHistory] = useState([]);
   const [summary, setSummary] = useState({
     totalScans: 0,
-    allergensDetected: 0,
     safeFoods: 0,
     riskAlerts: 0,
   });
   const [weeklyData, setWeeklyData] = useState([]);
-  const [allergenData, setAllergenData] = useState([]);
   const [foodData, setFoodData] = useState([]);
-
-  const COLORS = ["#A8E6CF", "#56CC9D", "#FFD166", "#FFB347", "#FF9AA2"];
 
   // 🔹 Helper: compute weekly trend from scan dates
   const computeWeeklyData = (scans) => {
     const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
     const weeklyCount = days.map((d) => ({ day: d, scans: 0 }));
-
     scans.forEach((scan) => {
       const day = new Date(scan.dateTime).getDay();
       weeklyCount[day].scans += 1;
@@ -41,28 +34,7 @@ const Reports = () => {
     return weeklyCount;
   };
 
-  // 🔹 Helper: compute allergen frequency
-  const computeAllergenData = (scans) => {
-    const counts = {};
-    scans.forEach((s) => {
-      s.allergens?.forEach((a) => {
-        counts[a] = (counts[a] || 0) + 1;
-      });
-    });
-
-    const entries = Object.entries(counts).map(([name, value]) => ({
-      name,
-      value,
-    }));
-
-    if (entries.length === 0) {
-      return [{ name: "No Allergens", value: 1 }];
-    }
-
-    return entries;
-  };
-
-  // 🔹 Helper: compute category safe vs unsafe (based on foodItem keywords)
+  // 🔹 Helper: compute category safe vs unsafe
   const computeFoodData = (scans) => {
     const categories = {
       Snacks: 0,
@@ -94,32 +66,24 @@ const Reports = () => {
     }));
   };
 
-  // 🔹 Load and process data
   const loadReportsData = () => {
     const stored = JSON.parse(localStorage.getItem("scanHistory")) || [];
     setScanHistory(stored);
 
     const totalScans = stored.length;
-    const allergensDetected = stored.filter((s) => s.allergens?.length > 0).length;
     const safeFoods = Math.round(
       (stored.filter((s) => s.safetyStatus === "Safe").length / (totalScans || 1)) * 100
     );
     const riskAlerts = stored.filter((s) => s.safetyStatus === "Risk").length;
 
-    setSummary({ totalScans, allergensDetected, safeFoods, riskAlerts });
+    setSummary({ totalScans, safeFoods, riskAlerts });
     setWeeklyData(computeWeeklyData(stored));
-    setAllergenData(computeAllergenData(stored));
     setFoodData(computeFoodData(stored));
   };
 
   useEffect(() => {
     loadReportsData();
-
-    // 🔄 Auto-refresh on scan updates
-    const updateHandler = () => {
-      console.log("📊 Reports updated from new scan");
-      loadReportsData();
-    };
+    const updateHandler = () => loadReportsData();
     window.addEventListener("scan-updated", updateHandler);
     return () => window.removeEventListener("scan-updated", updateHandler);
   }, []);
@@ -127,89 +91,67 @@ const Reports = () => {
   return (
     <div className="reports-container">
       <h1 className="reports-title">Reports & Analytics</h1>
-      <p className="reports-subtitle">
-        Detailed insights into your allergen scanning patterns
-      </p>
+      <p className="reports-subtitle">Insights into your scanning patterns</p>
 
       {/* Summary Cards */}
       <div className="reports-cards">
         <div className="report-card">
           <p className="card-label">Total Scans</p>
           <h2 className="card-value">{summary.totalScans}</h2>
-          <p className="card-change positive">Live data</p>
-        </div>
-
-        <div className="report-card">
-          <p className="card-label">Allergens Detected</p>
-          <h2 className="card-value warning">{summary.allergensDetected}</h2>
-          <p className="card-change negative">Auto-updating</p>
         </div>
 
         <div className="report-card">
           <p className="card-label">Safe Foods</p>
           <h2 className="card-value success">{summary.safeFoods}%</h2>
-          <p className="card-change positive">Healthy choices</p>
         </div>
 
         <div className="report-card">
           <p className="card-label">Risk Alerts</p>
           <h2 className="card-value danger">{summary.riskAlerts}</h2>
-          <p className="card-change negative">Monitor closely</p>
         </div>
       </div>
 
-      {/* Charts Section */}
-      <div className="chart-section">
-        <div className="chart-card">
-          <h3>Weekly Scan Activity</h3>
-          <LineChart width={400} height={200} data={weeklyData}>
+      {/* Weekly Scan Activity */}
+      <div className="chart-card">
+        <h3>Weekly Scan Activity</h3>
+        <ResponsiveContainer width="100%" height={250}>
+          <LineChart data={weeklyData} margin={{ top: 20, right: 20, left: 0, bottom: 20 }}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="day" />
             <YAxis />
             <Tooltip />
-            <Line
-              type="monotone"
-              dataKey="scans"
-              stroke="#2e7d32"
-              strokeWidth={3}
-              dot={{ r: 5 }}
-            />
+            <Line type="monotone" dataKey="scans" stroke="#2e7d32" strokeWidth={3} dot={{ r: 4 }} />
           </LineChart>
-        </div>
-
-        <div className="chart-card">
-          <h3>Allergen Distribution</h3>
-          <PieChart width={400} height={200}>
-            <Pie
-              data={allergenData}
-              dataKey="value"
-              cx="50%"
-              cy="50%"
-              outerRadius={70}
-              label
-            >
-              {allergenData.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-              ))}
-            </Pie>
-            
-            <Tooltip />w
-          </PieChart>
-        </div>
+        </ResponsiveContainer>
       </div>
 
-      {/* Food Category Chart */}
+      {/* Food Category Safe vs Unsafe */}
       <div className="chart-card full-width">
         <h3>Food Categories (Safe vs Unsafe)</h3>
-        <BarChart width={800} height={300} data={foodData}>
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="category" />
-          <YAxis />
-          <Tooltip />
-          <Legend />
-          <Bar dataKey="safe" fill="#2e7d32" name="Safe" />
-          <Bar dataKey="unsafe" fill="#e53935" name="Unsafe" />
-        </BarChart>
+        <ResponsiveContainer width="100%" height={300}>
+          <BarChart
+            data={foodData}
+            margin={{ top: 20, right: 20, left: 0, bottom: 50 }}
+          >
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis
+              dataKey="category"
+              interval={0}
+              angle={-20}
+              textAnchor="end"
+              height={50}
+            />
+            <YAxis />
+            <Tooltip />
+            <Legend
+              verticalAlign="bottom"
+              align="center"
+              wrapperStyle={{ marginTop: 10 }}
+            />
+            <Bar dataKey="safe" fill="#2e7d32" name="Safe" />
+            <Bar dataKey="unsafe" fill="#e53935" name="Unsafe" />
+          </BarChart>
+        </ResponsiveContainer>
       </div>
     </div>
   );

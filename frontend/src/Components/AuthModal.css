@@ -109,7 +109,7 @@ input {
   margin-bottom: 15px;
   padding: 12px;
   border-radius: 10px;
-  border: 1px solid rgba(200, 200, 200, 0.4);
+  border: 1px solid rgba(185, 155, 155, 0.4);
   background: rgba(255, 255, 255, 0.7);
   font-size: 1rem;
   outline: none;
@@ -312,4 +312,10 @@ input::placeholder {
 
 .eye-icon:hover {
   color: #000;
+}
+.forgot-link {
+  background: transparent !important;
+  padding: 0 !important;
+  margin: 0 0 15px 0;
+  display: inline-block;
 }

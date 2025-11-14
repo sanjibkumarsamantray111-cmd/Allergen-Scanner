@@ -83,12 +83,12 @@ const QuickScan = () => {
       const scannedIngredients = data.ingredients || [];
       setIngredients(scannedIngredients);
 
-      const normalizedIngredients = scannedIngredients.map((i) =>
-        i.toLowerCase().trim()
-      );
-      const normalizedUserAllergens = userAllergens.map((a) =>
-        a.toLowerCase().trim()
-      );
+      // 🔹 Improved normalization for plural & case-insensitive matching
+      const normalize = (str) =>
+        str.toLowerCase().trim().replace(/s$/,""); // removes trailing 's'
+
+      const normalizedIngredients = scannedIngredients.map(normalize);
+      const normalizedUserAllergens = userAllergens.map(normalize);
 
       const matched = normalizedUserAllergens.filter((allergen) =>
         normalizedIngredients.some((ing) => ing.includes(allergen))
@@ -96,7 +96,8 @@ const QuickScan = () => {
 
       setDetectedAllergens(matched);
 
-      const safety = matched.length === 0 ? 100 : 50;
+      // 🔹 Set safety: any allergen = Risk
+      const safety = matched.length === 0 ? 100 : 0; 
       setSafetyPercent(safety);
 
       const allergenAlternatives = {
@@ -107,6 +108,7 @@ const QuickScan = () => {
         shellfish: ["chicken", "tofu"],
         sugar: ["stevia", "monk fruit"],
         maggies: ["other instant noodles"],
+        egg: ["egg substitute", "tofu scramble"], // add egg alternatives
       };
 
       const matchedAlternatives = {};
@@ -117,22 +119,25 @@ const QuickScan = () => {
       });
       setAlternatives(matchedAlternatives);
 
-      setScanResultText("Analysis complete ✅");
+      setScanResultText(
+        matched.length > 0
+          ? "High Risk ⚠️ Contains allergens"
+          : "Analysis complete ✅ Safe to consume"
+      );
 
       const imageBase64 = await toBase64(uploadedImage);
 
       const newScan = {
         foodItem: uploadedImage.name || "Unknown Food",
         allergens: matched,
-        safetyStatus:
-          safety > 90 ? "Safe" : safety > 70 ? "Moderate" : "Risk",
+        safetyStatus: matched.length > 0 ? "Risk" : "Safe",
         safetyPercent: safety,
         dateTime: new Date().toISOString(),
         image: imageBase64,
       };
 
       const existing = JSON.parse(localStorage.getItem("scanHistory")) || [];
-      const updated = [newScan, ...existing];
+      const updated = [newScan, ...existing].slice(0, 8); // store only last 8 scans
       localStorage.setItem("scanHistory", JSON.stringify(updated));
 
       window.dispatchEvent(new Event("scan-updated"));
@@ -151,20 +156,50 @@ const QuickScan = () => {
     <div className="quickscan-container">
       <h1 className="title">Quick Scan</h1>
 
-      {/* Upload section */}
-      {!uploadedImage && (
-        <div className="upload-section card">
-          <label className="upload-btn">
-            Choose Image
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleFileChange}
-              hidden
-            />
-          </label>
+ {/* Upload Section */}
+{!uploadedImage && (
+  <div className="quick-scan-container">
+    <p className="subtitle">Upload an image to check for allergens</p>
+
+    <div className="upload-card-container">
+      <label className="upload-card">
+        <input
+          type="file"
+          accept="image/*,application/pdf"
+          onChange={handleFileChange}
+          hidden
+        />
+
+        <div className="upload-inner">
+          {/* Removed upload-icon */}
+
+          <p className="upload-text">Drop your file here</p>
+          <p className="upload-subtext">or click to browse from your device</p>
+
+          <div className="button-row">
+            <button
+              type="button"
+              className="btn upload-btn"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                document.querySelector(".upload-card input").click();
+              }}
+            >
+              Upload Your Image
+            </button>
+          </div>
+
+          <p className="file-info">
+            Supported formats: JPG, PNG
+          </p>
         </div>
-      )}
+      </label>
+    </div>
+  </div>
+)}
+
+
 
       {/* Image preview before scan */}
       {uploadedImage && !scanned && (
@@ -175,7 +210,11 @@ const QuickScan = () => {
             className="preview-img"
           />
           <div className="btn-group">
-            <button className="primary-btn" onClick={handleScan} disabled={loading}>
+            <button
+              className="primary-btn"
+              onClick={handleScan}
+              disabled={loading}
+            >
               {loading ? "Analyzing..." : "Analyze"}
             </button>
             <button className="secondary-btn" onClick={handleReupload}>
@@ -223,10 +262,8 @@ const QuickScan = () => {
               {safetyPercent !== null ? (
                 <div
                   className={`safety-circle ${
-                    safetyPercent > 90
+                    safetyPercent === 100
                       ? "safe"
-                      : safetyPercent > 70
-                      ? "moderate"
                       : "unsafe"
                   }`}
                 >

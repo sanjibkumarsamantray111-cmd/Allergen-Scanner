@@ -1,11 +1,13 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
-import "./AuthModal.css";
 import { Eye, EyeOff } from "lucide-react";
-import heroBg from "../assets/Gemini_Generated_Image_wwxt2mwwxt2mwwxt.png";
+import "./AuthModal.css";
 
-const AuthModal = ({ closeModal }) => {
+const AuthModal = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+
   const [isLogin, setIsLogin] = useState(true);
   const [formData, setFormData] = useState({ name: "", email: "", password: "" });
   const [message, setMessage] = useState("");
@@ -13,7 +15,11 @@ const AuthModal = ({ closeModal }) => {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  const navigate = useNavigate();
+  // Auto-switch to register/login based on state
+  useEffect(() => {
+    if (location.state?.view === "register") setIsLogin(false);
+    else setIsLogin(true);
+  }, [location.state]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -23,47 +29,32 @@ const AuthModal = ({ closeModal }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-
     try {
       localStorage.clear();
-
       if (isLogin) {
-        // 🔹 LOGIN FLOW
         const res = await axios.post("http://localhost:5000/api/auth/login", {
           email: formData.email,
           password: formData.password,
         });
-
         localStorage.setItem("token", res.data.token);
         localStorage.setItem("userData", JSON.stringify(res.data.user));
         setMessage(res.data.message || "Logged in successfully!");
         setMessageType("success");
-
-        setTimeout(() => {
-          if (typeof closeModal === "function") closeModal();
-          navigate("/dashboard");
-        }, 600);
+        // ✅ redirect to dashboard after login
+        setTimeout(() => navigate("/dashboard"), 600);
       } else {
-        // 🔹 REGISTER → AUTO-LOGIN → SHOW PROFILE POPUP ON DASHBOARD
         const res = await axios.post("http://localhost:5000/api/auth/register", {
           name: formData.name,
           email: formData.email,
           password: formData.password,
         });
-
         if (res.data.token) localStorage.setItem("token", res.data.token);
         if (res.data.user) localStorage.setItem("userData", JSON.stringify(res.data.user));
-
-        // ✅ Mark this user as "newly registered"
         localStorage.setItem("isNewAccount", "true");
-
         setMessage(res.data.message || "Registered successfully!");
         setMessageType("success");
-
-        setTimeout(() => {
-          if (typeof closeModal === "function") closeModal();
-          navigate("/dashboard"); // Go to dashboard, not login
-        }, 600);
+        // ✅ redirect to dashboard after register
+        setTimeout(() => navigate("/dashboard"), 600);
       }
     } catch (err) {
       setMessage(err.response?.data?.message || "Something went wrong!");
@@ -73,20 +64,15 @@ const AuthModal = ({ closeModal }) => {
     }
   };
 
-  const handleClose = () => {
-    if (typeof closeModal === "function") closeModal();
-  };
-
   const handleModalClick = (e) => e.stopPropagation();
+  const handleClose = () => navigate("/");
 
   return (
-    <div className="auth-modal-container" onClick={handleClose}>
-      <button className="back-btn" onClick={handleClose} aria-label="Close auth modal">
-        <i className="fa-solid fa-arrow-left"></i>
-      </button>
-
-      <div className="auth-modal" onClick={handleModalClick}>
+    <div className="auth-modal-overlay" onClick={handleClose}>
+      <div className="auth-modal-container" onClick={handleModalClick}>
+        <button className="back-btn" onClick={handleClose}>←</button>
         <div className="auth-box">
+          {/* Welcome Section */}
           <div className="welcome-section">
             <h2>Hello, Welcome!</h2>
             <p>{isLogin ? "Don't have an account?" : "Already have an account?"}</p>
@@ -95,16 +81,11 @@ const AuthModal = ({ closeModal }) => {
             </button>
           </div>
 
+          {/* Form Section */}
           <div className="form-section">
             <form onSubmit={handleSubmit}>
               <h2>{isLogin ? "Login" : "Register"}</h2>
-
-              {message && (
-                <p className={messageType === "success" ? "msg-success" : "msg-error"}>
-                  {message}
-                </p>
-              )}
-
+              {message && <p className={messageType === "success" ? "msg-success" : "msg-error"}>{message}</p>}
               {!isLogin && (
                 <input
                   type="text"
@@ -115,7 +96,6 @@ const AuthModal = ({ closeModal }) => {
                   required
                 />
               )}
-
               <input
                 type="email"
                 name="email"
@@ -124,8 +104,6 @@ const AuthModal = ({ closeModal }) => {
                 onChange={handleInputChange}
                 required
               />
-
-              {/* 👁 Password input with eye toggle */}
               <div className="password-container">
                 <input
                   type={showPassword ? "text" : "password"}
@@ -135,43 +113,18 @@ const AuthModal = ({ closeModal }) => {
                   onChange={handleInputChange}
                   required
                 />
-                <span
-                  className="eye-icon"
-                  onClick={() => setShowPassword(!showPassword)}
-                >
+                <span className="eye-icon" onClick={() => setShowPassword(!showPassword)}>
                   {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </span>
               </div>
-
               {isLogin && (
-                <button
-                  type="button"
-                  className="forgot-link"
-                  onClick={() => {
-                    if (typeof closeModal === "function") closeModal();
-                    navigate("/forgot-password");
-                  }}
-                >
+                <button type="button" className="forgot-link" onClick={() => navigate("/forgot-password")}>
                   Forgot Password?
                 </button>
               )}
-
               <button type="submit" className="main-btn" disabled={loading}>
                 {loading ? "Loading..." : isLogin ? "Login" : "Create Account"}
               </button>
-
-              {/* <p className="social-text">or login with social platforms</p>
-              <div className="social-btns">
-                <button type="button" aria-label="Sign in with Google">
-                  <i className="fa-brands fa-google google"></i>
-                </button>
-                <button type="button" aria-label="Sign in with Facebook">
-                  <i className="fa-brands fa-facebook facebook"></i>
-                </button>
-                <button type="button" aria-label="Sign in with Apple">
-                  <i className="fa-brands fa-apple apple"></i>
-                </button>
-              </div> */}
             </form>
           </div>
         </div>

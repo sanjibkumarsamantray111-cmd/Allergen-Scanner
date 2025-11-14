@@ -13,17 +13,17 @@ const ForgotPassword = () => {
     e.preventDefault();
     setLoading(true);
     setMessage("");
-
     try {
-      const res = await axios.post(
-        "http://localhost:5000/api/auth/forgot-password",
-        { email }
-      );
+      const res = await axios.post("http://localhost:5000/api/auth/forgot-password", { email });
       setMessage(res.data.message || "✅ Reset link sent to your email!");
     } catch (error) {
       setMessage(error.response?.data?.message || "❌ Error sending reset link");
     }
     setLoading(false);
+  };
+
+  const goBackToLogin = () => {
+    navigate("/auth", { state: { view: "login", backgroundLocation: { pathname: "/" } } });
   };
 
   return (
@@ -47,7 +47,7 @@ const ForgotPassword = () => {
 
         {message && <p className="response-msg">{message}</p>}
 
-        <p className="back-link" onClick={() => navigate("/")}>
+        <p className="back-link" onClick={goBackToLogin}>
           ← Back to Login
         </p>
       </div>

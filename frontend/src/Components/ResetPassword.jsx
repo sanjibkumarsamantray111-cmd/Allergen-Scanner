@@ -21,12 +21,20 @@ const ResetPassword = () => {
         { password }
       );
       setMessage(res.data.message || "✅ Password reset successful!");
-      setTimeout(() => navigate("/"), 2000);
+
+      // After 2 seconds, open AuthModal login
+      setTimeout(() => {
+        navigate("/auth", { state: { view: "login", backgroundLocation: { pathname: "/" } } });
+      }, 2000);
     } catch (error) {
       setMessage(error.response?.data?.message || "❌ Reset failed!");
     }
 
     setLoading(false);
+  };
+
+  const goBackToLogin = () => {
+    navigate("/auth", { state: { view: "login", backgroundLocation: { pathname: "/" } } });
   };
 
   return (
@@ -50,7 +58,7 @@ const ResetPassword = () => {
 
         {message && <p className="response-msg">{message}</p>}
 
-        <p className="back-link" onClick={() => navigate("/")}>
+        <p className="back-link" onClick={goBackToLogin}>
           ← Back to Login
         </p>
       </div>

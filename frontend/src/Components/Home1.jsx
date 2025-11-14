@@ -198,32 +198,26 @@ export default function Home1({ user }) {
                     </tr>
                   ) : (
                     recentScans.map((scan, index) => (
-                      <tr key={index}>
-                        <td>{scan.foodItem}</td>
-                        <td>
-                          {scan.allergens?.length
-                            ? scan.allergens.join(", ")
-                            : "None"}
-                        </td>
-                        <td>
-                          <span
-                            className={`safety-badge ${getSafetyStatusClass(
-                              scan.safetyStatus
-                            )}`}
-                          >
-                            {getSafetyIcon(scan.safetyStatus)}{" "}
-                            {scan.safetyStatus} ({scan.safetyPercent || 0}%)
-                          </span>
-                        </td>
-                        <td>
-                          {new Date(scan.dateTime).toLocaleString("en-IN", {
-                            month: "short",
-                            day: "2-digit",
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
-                        </td>
-                      </tr>
+                    <tr key={index}>
+  <td data-label="Food Item">{scan.foodItem}</td>
+  <td data-label="Allergens">
+    {scan.allergens?.length ? scan.allergens.join(", ") : "None"}
+  </td>
+  <td data-label="Safety Status">
+    <span className={`safety-badge ${getSafetyStatusClass(scan.safetyStatus)}`}>
+      {getSafetyIcon(scan.safetyStatus)} {scan.safetyStatus} ({scan.safetyPercent || 0}%)
+    </span>
+  </td>
+  <td data-label="Date & Time">
+    {new Date(scan.dateTime).toLocaleString("en-IN", {
+      month: "short",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+    })}
+  </td>
+</tr>
+
                     ))
                   )}
                 </tbody>

@@ -111,6 +111,25 @@ function Profile() {
     }
   };
 
+  // 🔹 Delete allergen handler
+  const handleDeleteAllergen = async (allergen) => {
+    try {
+      const token = localStorage.getItem("token");
+
+      await API.put(
+        "/profile/remove-allergen",
+        { allergen },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      toast.success("Allergen removed!");
+      fetchProfile();
+    } catch (err) {
+      console.error("❌ Error deleting allergen:", err);
+      toast.error("Failed to remove allergen!");
+    }
+  };
+
   if (loading) return <div className="loading">Loading your profile...</div>;
   if (!profile) return <div className="no-profile">Profile not found.</div>;
 
@@ -173,6 +192,14 @@ function Profile() {
               {profile.foods.map((item, i) => (
                 <span key={i} className="allergen-tag">
                   {item.allergen}
+
+                  {/* Delete button */}
+                  <button
+                    className="allergen-remove-btn"
+                    onClick={() => handleDeleteAllergen(item.allergen)}
+                  >
+                    ✖
+                  </button>
                 </span>
               ))}
             </div>
@@ -183,74 +210,71 @@ function Profile() {
       </div>
 
       {/* EDIT MODAL */}
-  {/* EDIT MODAL */}
-{showEditModal && (
-  <div className="modal-overlay">
-    <div className="modal glass-card">
-      <h2>Edit Profile</h2>
-      <input
-        type="text"
-        name="fullName"
-        placeholder="Full Name"
-        value={formData.fullName}
-        onChange={handleEditChange}
-      />
+      {showEditModal && (
+        <div className="modal-overlay">
+          <div className="modal glass-card">
+            <h2>Edit Profile</h2>
+            <input
+              type="text"
+              name="fullName"
+              placeholder="Full Name"
+              value={formData.fullName}
+              onChange={handleEditChange}
+            />
 
-      {/* DOB input restricted to valid date */}
-      <input
-        type="date"
-        name="dob"
-        placeholder="Date of Birth"
-        value={formData.dob}
-        onChange={handleEditChange}
-        max={new Date().toISOString().split("T")[0]} // DOB cannot be in the future
-      />
+            {/* DOB */}
+            <input
+              type="date"
+              name="dob"
+              placeholder="Date of Birth"
+              value={formData.dob}
+              onChange={handleEditChange}
+              max={new Date().toISOString().split("T")[0]}
+            />
 
-      {/* Phone input restricted to digits only */}
-      <input
-        type="tel"
-        name="phone"
-        placeholder="Phone (10 digits)"
-        value={formData.phone}
-        onChange={handleEditChange}
-        pattern="[0-9]{10}"
-        maxLength={10}
-        title="Enter a valid 10-digit phone number"
-      />
+            {/* Phone */}
+            <input
+              type="tel"
+              name="phone"
+              placeholder="Phone (10 digits)"
+              value={formData.phone}
+              onChange={handleEditChange}
+              pattern="[0-9]{10}"
+              maxLength={10}
+              title="Enter a valid 10-digit phone number"
+            />
 
-      <input
-        type="text"
-        name="location"
-        placeholder="Location"
-        value={formData.location}
-        onChange={handleEditChange}
-      />
+            <input
+              type="text"
+              name="location"
+              placeholder="Location"
+              value={formData.location}
+              onChange={handleEditChange}
+            />
 
-      <div className="modal-buttons">
-        <button onClick={handleSaveProfile} className="save-btn">
-          Save
-        </button>
-        <button
-          onClick={() => setShowEditModal(false)}
-          className="cancel-btn"
-        >
-          Cancel
-        </button>
-      </div>
-    </div>
-  </div>
-)}
+            <div className="modal-buttons">
+              <button onClick={handleSaveProfile} className="save-btn">
+                Save
+              </button>
+              <button
+                onClick={() => setShowEditModal(false)}
+                className="cancel-btn"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ADD ALLERGEN MODAL */}
       {showAllergenModal && (
         <div className="modal-overlay">
           <div className="modal glass-card">
             <h2>Add Allergen</h2>
-            <label htmlFor="existing-allergen">
-              Select from common allergens:
-            </label>
+
+            <label>Select from common allergens:</label>
             <select
-              id="existing-allergen"
               value={newAllergen}
               onChange={(e) => setNewAllergen(e.target.value)}
             >

@@ -1,4 +1,5 @@
 import React from 'react';
+import { BrainCircuit } from "lucide-react";
 import './HowItWork.css'; 
 import { useNavigate } from 'react-router-dom';
 
@@ -58,10 +59,10 @@ const HowItWorks = ({ openAuthModal }) => {
           <div className="step-box">
             {/* 2. AI Analysis */}
             <div className="step-icon-wrapper" style={{ 
-                background: '#F3E8FF', // Light Purple
-                color: '#8B5CF6'       // Dark Purple
+                background: '#F3E8FF', 
+                color: '#5f3ab6ff'     
             }}>
-              <BrainIcon />
+              <BrainCircuit />
             </div>
             <h3 className="step-title">2. AI Analysis</h3>
             <p className="step-description">
@@ -72,8 +73,8 @@ const HowItWorks = ({ openAuthModal }) => {
           <div className="step-box">
             {/* 3. Get Results */}
             <div className="step-icon-wrapper" style={{ 
-                background: '#FCE7F3', // Light Pink
-                color: '#EC4899'       // Dark Pink
+                background: '#dd3193ff', // Light Pink
+                color: '#ca0f6cff'       // Dark Pink
             }}>
               <ShieldCheckIcon />
             </div>

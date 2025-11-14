@@ -299,7 +299,7 @@
 .footer {
   background-color: #3f5246;
   color: #959595;
-   margin-top: auto;
+   margin-top: 0 !important;
   padding: 60px 8%;
   font-family: "Poppins", sans-serif;
   border-top: 1px solid rgba(255, 255, 255, 0.05);

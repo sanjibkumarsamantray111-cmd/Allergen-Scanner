@@ -126,4 +126,47 @@ router.put("/update", protect, async (req, res) => {
   }
 });
 
+/* =========================================================
+   ❌ REMOVE ALLERGEN
+   ========================================================= */
+router.put("/remove-allergen", protect, async (req, res) => {
+  const { allergen } = req.body;
+
+  if (!allergen) {
+    return res.status(400).json({ message: "Allergen is required to remove" });
+  }
+
+  try {
+    const profile = await Profile.findOne({ userId: req.userId });
+
+    if (!profile) {
+      return res.status(404).json({ message: "Profile not found" });
+    }
+
+    const beforeCount = profile.foods.length;
+
+    // Remove allergen
+    profile.foods = profile.foods.filter(
+      (item) => item.allergen.toLowerCase() !== allergen.toLowerCase()
+    );
+
+    // If nothing removed
+    if (profile.foods.length === beforeCount) {
+      return res.status(400).json({ message: "Allergen not found" });
+    }
+
+    await profile.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Allergen removed successfully",
+      profile,
+    });
+  } catch (error) {
+    console.error("❌ Error removing allergen:", error.message);
+    res.status(500).json({ message: "Error removing allergen" });
+  }
+});
+
+
 export default router;
