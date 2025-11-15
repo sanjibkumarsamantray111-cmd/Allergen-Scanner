@@ -66,7 +66,7 @@ function AppWrapper() {
         <Route path="/food-safety" element={<FoodSafety />} />
 
         <Route
-          path="/dashboard/*"
+          path="/*"
           element={
             <PrivateRoute>
               <Dashboard onLogout={handleLogout} />

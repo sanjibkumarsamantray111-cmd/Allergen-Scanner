@@ -40,14 +40,14 @@ const Sidebar = ({ isOpen, setActivePage, handleLogout, toggleSidebar }) => {
   }, [isOpen, toggleSidebar]);
 
   const menuItems = [
-    { label: "Home", icon: <FaHome />, path: "/dashboard/home" },
-    { label: "My Profile", icon: <FaUser />, path: "/dashboard/my-profile" },
-    { label: "Quick Scan", icon: <FaBolt />, path: "/dashboard/quick-scan" },
-    { label: "Scan History", icon: <FaHistory />, path: "/dashboard/scan-history" },
-    { label: "Reports", icon: <FaFileAlt />, path: "/dashboard/reports" },
-    { label: "AI Assistant", icon: <FaRobot />, path: "/dashboard/assistant" },
-    { label: "Learn", icon: <FaBook />, path: "/dashboard/learn" },
-    { label: "Subscription", icon: <FaHandHolding />, path: "/dashboard/subscription" },
+    { label: "Home", icon: <FaHome />, path: "/home" },
+    { label: "My Profile", icon: <FaUser />, path: "/my-profile" },
+    { label: "Quick Scan", icon: <FaBolt />, path: "/quick-scan" },
+    { label: "Scan History", icon: <FaHistory />, path: "/scan-history" },
+    { label: "Reports", icon: <FaFileAlt />, path: "/reports" },
+    { label: "AI Assistant", icon: <FaRobot />, path: "/assistant" },
+    { label: "Learn", icon: <FaBook />, path: "/learn" },
+    { label: "Subscription", icon: <FaHandHolding />, path: "/subscription" },
   ];
 
   const handleMenuClick = (page, path) => {
@@ -62,7 +62,7 @@ const Sidebar = ({ isOpen, setActivePage, handleLogout, toggleSidebar }) => {
     localStorage.removeItem("user");
     if (handleLogout) handleLogout();
 
-    // Navigate immediately without closing sidebar animation
+    
     navigate("/", { replace: true });
   };
 
