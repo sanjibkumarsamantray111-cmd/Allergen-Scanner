@@ -71,7 +71,7 @@ const QuickScan = () => {
       const formData = new FormData();
       formData.append("image", uploadedImage);
 
-      const resp = await fetch("http://localhost:5000/api/scan", {
+      const resp = await fetch("https://alleregen-scanner-app.onrender.com/api/scan", {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
         body: formData,

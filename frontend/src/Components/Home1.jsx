@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import "./home1.css";
+import "./Home1.css";
 import heroBg from "../assets/Gemini_Generated_Image_wwxt2mwwxt2mwwxt.png";
 import profileLogo from "../assets/Final Logo.png";
 import {
