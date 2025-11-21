@@ -138,17 +138,17 @@ function Home() {
             <h3>Quick Links</h3>
             <ul>
               <li><a href="/">Home</a></li>
-              <li><a href="/terms-of-use">Terms Of Use</a></li>
-              <li><a href="/privacy-policy">Privacy Policy</a></li>
+              <li><Link to="/terms-of-use">Terms Of Use</Link></li>
+            <li><Link to="/privacy-policy">Privacy Policy</Link></li>
             </ul>
           </div>
 
           <div className="footer-column">
             <h3>Resources</h3>
             <ul>
-              <li><a href="/about-allergens">About Allergens</a></li>
-              <li><a href="/food-safety">Food Safety</a></li>
-              <li><a href="/faq">FAQ</a></li>
+              <li><Link to="/about-allergens">About Allergens</Link></li>
+<li><Link to="/food-safety">Food Safety</Link></li>
+<li><Link to="/faq">FAQ</Link></li>
             </ul>
           </div>
 
