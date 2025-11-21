@@ -1,3 +1,4 @@
+// backend/controllers/authController.js
 import User from "../models/User.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
@@ -11,7 +12,8 @@ export const registerUser = async (req, res) => {
 
   try {
     const existingUser = await User.findOne({ email });
-    if (existingUser) return res.status(400).json({ message: "User already exists" });
+    if (existingUser)
+      return res.status(400).json({ message: "User already exists" });
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = await User.create({ name, email, password: hashedPassword });
@@ -28,7 +30,7 @@ export const registerUser = async (req, res) => {
 
     const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: "1h" });
 
-    // Respond immediately
+    // Respond immediately to client
     res.status(200).json({
       message: "User registered successfully",
       token,
@@ -40,10 +42,11 @@ export const registerUser = async (req, res) => {
       sendEmail(
         user.email,
         "Welcome to Allergen Scanner",
-        `Hello ${user.name || "User"},\n\nYour account has been created successfully.\n\n– Allergen Scanner Team`
+        `<p>Hello ${user.name || "User"},</p>
+         <p>Your account has been created successfully.</p>
+         <p>– Allergen Scanner Team</p>`
       );
     });
-
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Error registering user" });
@@ -74,10 +77,12 @@ export const loginUser = async (req, res) => {
       sendEmail(
         user.email,
         "Login Notification",
-        `Hello ${user.name || "User"},\n\nYou just logged into your account.\nIf this wasn’t you, please reset your password immediately.\n\n– Allergen Scanner Team`
+        `<p>Hello ${user.name || "User"},</p>
+         <p>You just logged into your account.</p>
+         <p>If this wasn’t you, please reset your password immediately.</p>
+         <p>– Allergen Scanner Team</p>`
       );
     });
-
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Error logging in" });
