@@ -5,6 +5,7 @@ import HowItWorks from "./HowItWork";
 import AuthModal from "./AuthModal";
 import ContactModal from "./ContactModal";
 import "./Home.css";
+import { Link } from "react-router-dom";
 
 // Assets
 import logo from "../assets/Final Logo.png";
