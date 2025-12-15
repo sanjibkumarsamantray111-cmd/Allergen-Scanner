@@ -14,7 +14,7 @@ const router = express.Router();
 const upload = multer({ dest: "uploads/" });
 
 const FOOD_SCAN_API_URL =
-  "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
+"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
 const FOOD_SCAN_API_KEY = process.env.FOOD_SCAN_API_KEY;
 
 // ✅ Helper to calculate safety percentage
