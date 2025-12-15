@@ -2,11 +2,11 @@ import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
 import mongoose from "mongoose";
-import multer from "multer";
-import fs from "fs";
-import path from "path";
+// import multer from "multer";
+// import fs from "fs";
+// import path from "path";
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import profileRoutes from "./routes/profileRoutes.js";
+
 
 // Routes
 import authRoutes from "./routes/authRoutes.js";
@@ -15,7 +15,7 @@ import preferenceRoutes from "./routes/preferenceRoutes.js";
 import scanRoutes from "./routes/scanRoutes.js";
 import passwordRoutes from "./routes/passwordRoutes.js";
 import contactRoutes from "./routes/contactRoutes.js";
-
+import profileRoutes from "./routes/profileRoutes.js";
 
 dotenv.config();
 
@@ -41,110 +41,83 @@ app.use("/api/profile", profileRoutes);
 app.use("/api/password", passwordRoutes);
 app.use("/api/contact", contactRoutes);
 
-// --- GEMINI AI SETUP ---
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+// ⭐ Route: List available Gemini models
+    app.get("/api/models", async (req, res) => {
+      try {
+        const response = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models?key=${process.env.GEMINI_API_KEY}`
+        );
 
-let chatHistory = [];
-
-// --- AI CHAT ENDPOINT ---
-app.post("/api/ask", async (req, res) => {
-  const { question } = req.body;
-
-  if (!question) {
-    return res.status(400).json({ answer: "⚠ Error: No question provided." });
-  }
-
-  try {
-    const model = genAI.getGenerativeModel({
-      model: "gemini-pro-latest",
-      systemInstruction:
-        "You are an AI allergen assistant that helps users identify food allergens and provide safety advice clearly and accurately.",
+        const data = await response.json();
+        res.json(data);
+      } catch (err) {
+        console.error("Error listing models:", err);
+        res.status(500).json({ error: "Failed to fetch models", details: err });
+      }
     });
 
-    // 🧠 Include previous temporary messages in the context
-    const chat = model.startChat({
-      history: chatHistory.map((m) => ({
-        role: m.sender,
-        parts: [{ text: m.text }],
-      })),
+    // GEMINI AI SETUP
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+    let chatHistory = [];
+
+    app.post("/api/ask", async (req, res) => {
+      const { question } = req.body;
+
+      if (!question) {
+        return res.status(400).json({ answer: "⚠ Error: No question provided." });
+      }
+
+      if (!process.env.GEMINI_API_KEY) {
+        console.error("❌ Missing GEMINI_API_KEY");
+        return res.status(500).json({
+          answer: "⚠ Server error: Gemini API key missing!",
+        });
+      }
+
+      try {
+        const model = genAI.getGenerativeModel({
+          model: "gemini-2.5-flash", // current model
+          systemInstruction:
+            "You are an AI allergen assistant. Answer in 1–2 short, clear sentences focused only on food allergens and safety.",
+        });
+
+        const chat = model.startChat({
+          history: chatHistory.map((m) => ({
+            role: m.sender,
+            parts: [{ text: m.text }],
+          })),
+        });
+
+        chatHistory.push({ sender: "user", text: question });
+
+        // Send just the question; style is controlled by systemInstruction
+        const result = await chat.sendMessage(question);
+
+        const answer = result?.response?.text()?.trim() || "(no output)";
+        chatHistory.push({ sender: "model", text: answer });
+
+        if (chatHistory.length > 20) chatHistory = chatHistory.slice(-20);
+
+        res.json({ answer });
+      } catch (error) {
+        console.error("❌ Gemini Error:", error);
+        res.status(500).json({
+          answer: "⚠ Error: AI could not generate a response. Check server logs.",
+        });
+      }
     });
 
-    // 🗣 Add user question to temporary memory
-    chatHistory.push({ sender: "user", text: question });
 
-    const result = await chat.sendMessage(
-      `Answer briefly (2–3 sentences) about food allergens: ${question}`
-    );
-
-    const answer = result.response.text().trim();
-
-    // 💬 Store AI response temporarily
-    chatHistory.push({ sender: "model", text: answer });
-
-    // 🧹 Limit memory to last 20 messages
-    if (chatHistory.length > 20) chatHistory = chatHistory.slice(-20);
-
-    res.json({ answer });
-  } catch (error) {
-    console.error("❌ Gemini error:", error);
-    res.status(500).json({ answer: "⚠ Error: Unable to fetch AI response." });
-  }
-});
-
-app.get("/api/chat-history", (req, res) => {
-  res.json(chatHistory);
-});
-
-// --- MULTER SETUP ---
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const dir = "uploads";
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir);
-    cb(null, dir);
-  },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + path.extname(file.originalname));
-  },
-});
-
-const upload = multer({ storage });
-
-// --- SCAN ENDPOINT ---
-app.post("/api/scan", upload.single("image"), async (req, res) => {
-  try {
-    if (!req.file) {
-      return res.status(400).json({ error: "No image uploaded" });
-    }
-
-    console.log("📸 Uploaded file:", req.file.filename);
-
-    // Fake allergen detection logic
-    const allergens = [
-      { name: "Gluten-Free", confidence: Math.floor(Math.random() * 20) + 80 },
-      { name: "Dairy-Free", confidence: Math.floor(Math.random() * 20) + 75 },
-      { name: "Nut-Free", confidence: Math.floor(Math.random() * 20) + 70 },
-    ];
-
-    const avg =
-      allergens.reduce((sum, a) => sum + a.confidence, 0) / allergens.length;
-
-    const result = {
-      score: avg.toFixed(1),
-      status: avg > 90 ? "Safe" : avg > 75 ? "Moderate" : "Risky",
-      allergens,
-    };
-
-    // Clean up the uploaded file after processing
-    fs.unlink(req.file.path, (err) => {
-      if (err) console.error("❌ Error deleting uploaded file:", err);
+    // Chat history view
+    app.get("/api/chat-history", (req, res) => {
+      res.json(chatHistory);
     });
 
-    res.json(result);
-  } catch (err) {
-    console.error("❌ Scan Error:", err);
-    res.status(500).json({ error: "Error analyzing image" });
-  }
-});
+    // Global error handler
+    app.use((err, req, res, next) => {
+      console.error("GLOBAL ERROR:", err);
+      res.status(500).json({ message: "Something went wrong." });
+    });
 
 // --- START SERVER ---
 const PORT = process.env.PORT || 5000;
