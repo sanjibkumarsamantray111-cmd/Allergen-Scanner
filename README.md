@@ -32,7 +32,7 @@ Scanner libraries, APIs
 
 Clone repository
 
-git clone https://github.com/dwbandss/Alleregen-Scanner-app.git
+git clone https://github.com/sanjibkumarsamantray111-cmd/Allergen-Scanner.git
 
 
 Install dependencies
