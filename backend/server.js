@@ -1,6 +1,9 @@
-import express from "express";
 import dotenv from "dotenv";
+dotenv.config();
+
+// console.log("ENV TEST:", process.env.RESEND_API_KEY);
 import cors from "cors";
+import express from "express";
 import mongoose from "mongoose";
 // import multer from "multer";
 // import fs from "fs";
@@ -10,14 +13,14 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 
 // Routes
 import authRoutes from "./routes/authRoutes.js";
-import dashboardRoutes from "./routes/dashboardRoutes.js";
-import preferenceRoutes from "./routes/preferenceRoutes.js";
-import scanRoutes from "./routes/scanRoutes.js";
-import passwordRoutes from "./routes/passwordRoutes.js";
 import contactRoutes from "./routes/contactRoutes.js";
+import dashboardRoutes from "./routes/dashboardRoutes.js";
+import passwordRoutes from "./routes/passwordRoutes.js";
+import preferenceRoutes from "./routes/preferenceRoutes.js";
 import profileRoutes from "./routes/profileRoutes.js";
+import scanRoutes from "./routes/scanRoutes.js";
 
-dotenv.config();
+
 
 // --- MONGO CONNECTION ---
 mongoose

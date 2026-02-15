@@ -1,12 +1,11 @@
-import express from "express";
-import multer from "multer";
 import axios from "axios";
 import dotenv from "dotenv";
+import express from "express";
 import fs from "fs";
+import multer from "multer";
+import protect from "../middleware/authMiddleware.js";
 import Scan from "../models/Scan.js";
 import User from "../models/User.js";
-import Profile from "../models/Profile.js";
-import protect from "../middleware/authMiddleware.js";
 
 dotenv.config();
 
